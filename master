@@ -1,4 +1,5 @@
-#import time
+# import time
+from typing import Dict
 
 
 class Character:
@@ -27,7 +28,7 @@ class Character:
         self.points = 1
         self.skills = []
 
-    def info(self):
+    def all_info(self):
         print('Имя:', self.name)
         print('Уровень:                     ', self.lvl)
         print('Очки:                        ', self.points)
@@ -41,6 +42,12 @@ class Character:
         print('Броня:                       ', self.armor)
         print('Сопротивление магии:         ', self.mag_resist, '%')
         print('Умения:                      ', self.skills)
+
+    def info(self):
+        print('Имя:', self.name)
+        print('Здоровье:                    ', self.hp)
+        print('Мана:                        ', self.mp)
+        print('Броня:                       ', self.armor)
 
     def strength_bonus(self):
         if self.old_strength < self.strength:
@@ -120,8 +127,7 @@ class Enemy:
                 self.mp = 20
                 self.mag_resist = 0.1
 
-
-    def info(self):
+    def all_info(self):
         match self.name:
             case 'goblin':
                 print('Гоблин:')
@@ -130,6 +136,14 @@ class Enemy:
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
         print('Сопротивление магии:         ', self.mag_resist, '%')
+
+    def info(self):
+        match self.name:
+            case 'goblin':
+                print('Гоблин:')
+        print('Здоровье:                    ', self.hp)
+        print('Мана:                        ', self.mp)
+        print('Броня:                       ', self.armor)
 
     def armor_impact(self):
         damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
@@ -144,6 +158,7 @@ class Enemy:
 class Skill:
     def __init__(self):
         cost = 0
+    stone_skin_1: dict[str, int] = dict(duration=3, reload=5)
     # type = []
     # base_list = []
     # earth_list = []
@@ -162,7 +177,7 @@ class Skill:
     def new(self, person):
         print('Выберете способность для изучения')
         if person.lvl == 2:
-            print ('1 - Каменная кожа. 1ур')
+            print('1 - Каменная кожа. 1ур')
             a = input()
             match a:
                 case '1':
@@ -170,29 +185,40 @@ class Skill:
 
     def StoneSkin_1(user):
         skill = Skill()
-        name = 'Каменная кожа'
         skill.cost = 20
         if user.mp >= skill.cost:
-            user.mp -=skill.cost
+            user.mp -= skill.cost
             user.armor += 4
-            print ('Вы использовали заклинание {0} и потратили на это {1} маны'.format(name, skill.cost))
-            return [3, 5]
+            print('Вы покрыли себя камнем и потратили на это {0} маны'.format(skill.cost))
+            return Skill.stone_skin_1
         print('Не хватает маны')
+
+    def UnStoneSkin_1(user):
+        user.armor -= 4
+        print("Каменная кожа утратила свою силу")
+
+def check(timer):
+    if 0 not in timer.values():
+            for i in range(len(timer)):
+                a = timer.get('duration')
+                a -= 1
+                if timer['duration'] > 0:
+                    print('Оставшаяся длительность {0}: {1}'.format(i + 1, timer['duration']))
+    if 0 in timer.values():
+        print('Умение {0} перестало действовать'.format(timer.index(0) + 1))
+        while timer.count(0) > 0:
+            timer.remove(0)
+            # match timer:
+            #     case timer.index(skin_stone_1) = 0:
+            #         Skill.UnStoneSkin_1(person)
 
 
 def battle(enemy):
     count = 1
-    duration = []
+    duration: dict[str, int] = dict()
     while enemy.hp > 0 and person.hp > 0:
-        if len(duration) > 0:
-            for i in range(len(duration)):
-                duration[i] -= 1
-                if duration[i] > 0:
-                    print('Оставшаяся длительность {0}: {1}'.format(i+1, duration[i]))
-        if duration.count(0) > 0:
-            print('Умение {0} перестало действовать'.format(duration.index(0)+1))
-            duration.remove(0)
-        print('Ход {0} как вы поступите?' .format(count))
+        check(duration)
+        print('Ход {0} как вы поступите?'.format(count))
         print('1            Атаковать')
         skill_number = 2
         for key in person.skills:
@@ -204,22 +230,21 @@ def battle(enemy):
                 a = enemy.take_attack(person.dmg)
                 print(enemy.name, 'получил', a, 'урона')
             case '2':
-                data=Skill.StoneSkin_1(person)
-                duration.append(data[0])
+                duration = Skill.StoneSkin_1(person)
             case _:
                 continue
         b = person.take_attack(enemy.dmg)
-        print(person.name, 'получил', b, 'урона')
+        print('Вы получили', b, 'урона')
         person.info()
         enemy.info()
         count += 1
+        print(duration)
 
 
 person = Character()
-person.info()
+person.all_info()
 person.lvl_up()
-person.info()
 goblin_1 = Enemy('goblin')
 print('')
-goblin_1.info()
+goblin_1.all_info()
 battle(goblin_1)
