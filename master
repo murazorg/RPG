@@ -1,0 +1,225 @@
+#import time
+
+
+class Character:
+    def __init__(self):
+        print('Введите имя для своего персонажа')
+        self.name = input()
+        self.strength = 0
+        self.old_strength = 0
+        self.agility = 0
+        self.old_agility = 0
+        self.intellect = 0
+        self.old_intellect = 0
+        self.hp = 100
+        self.old_hp = 100
+        self.dmg = 10
+        self.old_dmg = 10
+        self.mp = 50
+        self.old_mp = 50
+        self.amp_mag_dmg = 0
+        self.old_amp_mag_dmg = 0
+        self.armor = 0
+        self.old_armor = 0
+        self.mag_resist = 0.25
+        self.old_mag_resist = 0
+        self.lvl = 1
+        self.points = 1
+        self.skills = []
+
+    def info(self):
+        print('Имя:', self.name)
+        print('Уровень:                     ', self.lvl)
+        print('Очки:                        ', self.points)
+        print('Сила:                        ', self.strength)
+        print('Ловкость:                    ', self.agility)
+        print('Интеллект:                   ', self.intellect)
+        print('Здоровье:                    ', self.hp)
+        print('Урон:                        ', self.dmg)
+        print('Мана:                        ', self.mp)
+        print('Колдовство:                  ', self.amp_mag_dmg, '%')
+        print('Броня:                       ', self.armor)
+        print('Сопротивление магии:         ', self.mag_resist, '%')
+        print('Умения:                      ', self.skills)
+
+    def strength_bonus(self):
+        if self.old_strength < self.strength:
+            a = self.strength - self.old_strength
+            self.hp += 10 * a
+            self.mag_resist += 0.1 * a
+            self.old_strength = self.strength
+
+    def agility_bonus(self):
+        if self.old_agility < self.agility:
+            a = self.agility - self.old_agility
+            self.dmg += 1 * a
+            self.armor += 0.25 * a
+            self.old_agility = self.agility
+
+    def intellect_bonus(self):
+        self.mp += 5 * self.intellect
+        self.amp_mag_dmg += 0.2 * self.intellect
+
+    def armor_impact(self):
+        damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
+        # print('Physical damage reduction: ', damage_reduction, '%', sep='')
+        return round(damage_reduction, 2)
+
+    def lvl_up(self):
+        print('Какой атрибут вы желаете увеличить на 5?')
+        print('                 1    Силу')
+        print('                 2    Ловкость')
+        print('                 3    Интеллект')
+        choose = input()
+        match choose:
+            case '1':
+                self.strength += 5
+                self.strength_bonus()
+                self.points -= 1
+                self.lvl += 1
+            case '2':
+                self.agility += 5
+                self.agility_bonus()
+                self.points -= 1
+                self.lvl += 1
+            case '3':
+                self.intellect += 5
+                self.intellect_bonus()
+                self.points -= 1
+                self.lvl += 1
+            case _:
+                return
+        skill = Skill()
+        skill.new(self)
+
+    def take_attack(self, attack):
+        impact = attack - (attack * self.armor_impact())
+        self.hp -= round(impact, 0)
+        self.old_hp = self.hp
+        return round(impact, 0)
+
+
+class Enemy:
+    hp = 0
+    dmg = 0
+    mp = 0
+    armor = 0
+    mag_resist = 0
+
+    def __init__(self, name):
+        self.name = name
+        match self.name:
+            case 'goblin':
+                self.hp = 50
+                self.dmg = 5
+                self.armor = 2
+                self.mag_resist = 0.1
+            case 'orc':
+                self.hp = 200
+                self.dmg = 15
+                self.mp = 20
+                self.mag_resist = 0.1
+
+
+    def info(self):
+        match self.name:
+            case 'goblin':
+                print('Гоблин:')
+        print('Здоровье:                    ', self.hp)
+        print('Урон:                        ', self.dmg)
+        print('Мана:                        ', self.mp)
+        print('Броня:                       ', self.armor)
+        print('Сопротивление магии:         ', self.mag_resist, '%')
+
+    def armor_impact(self):
+        damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
+        return round(damage_reduction, 2)
+
+    def take_attack(self, attack):
+        impact = attack - (attack * self.armor_impact())
+        self.hp -= round(impact, 0)
+        return round(impact, 0)
+
+
+class Skill:
+    def __init__(self):
+        cost = 0
+    # type = []
+    # base_list = []
+    # earth_list = []
+    # water_list = []
+    # fire_list = []
+    # wind_list = []
+    # lightning_list = []
+    # life_list = []
+    # matter_list = []
+    # ice_list = []
+    # destruction_list = []
+    # light_list = []
+    # dark_list = []
+    # pure_list = []
+
+    def new(self, person):
+        print('Выберете способность для изучения')
+        if person.lvl == 2:
+            print ('1 - Каменная кожа. 1ур')
+            a = input()
+            match a:
+                case '1':
+                    person.skills.append('Каменная кожа. 1ур')
+
+    def StoneSkin_1(user):
+        skill = Skill()
+        name = 'Каменная кожа'
+        skill.cost = 20
+        if user.mp >= skill.cost:
+            user.mp -=skill.cost
+            user.armor += 4
+            print ('Вы использовали заклинание {0} и потратили на это {1} маны'.format(name, skill.cost))
+            return [3, 5]
+        print('Не хватает маны')
+
+
+def battle(enemy):
+    count = 1
+    duration = []
+    while enemy.hp > 0 and person.hp > 0:
+        if len(duration) > 0:
+            for i in range(len(duration)):
+                duration[i] -= 1
+                if duration[i] > 0:
+                    print('Оставшаяся длительность {0}: {1}'.format(i+1, duration[i]))
+        if duration.count(0) > 0:
+            print('Умение {0} перестало действовать'.format(duration.index(0)+1))
+            duration.remove(0)
+        print('Ход {0} как вы поступите?' .format(count))
+        print('1            Атаковать')
+        skill_number = 2
+        for key in person.skills:
+            print('{0}          {1}'.format(skill_number, key))
+            skill_number += 1
+        choose = input()
+        match choose:
+            case '1':
+                a = enemy.take_attack(person.dmg)
+                print(enemy.name, 'получил', a, 'урона')
+            case '2':
+                data=Skill.StoneSkin_1(person)
+                duration.append(data[0])
+            case _:
+                continue
+        b = person.take_attack(enemy.dmg)
+        print(person.name, 'получил', b, 'урона')
+        person.info()
+        enemy.info()
+        count += 1
+
+
+person = Character()
+person.info()
+person.lvl_up()
+person.info()
+goblin_1 = Enemy('goblin')
+print('')
+goblin_1.info()
+battle(goblin_1)
