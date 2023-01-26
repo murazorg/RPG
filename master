@@ -13,10 +13,12 @@ class Character:
         self.intellect = 0
         self.old_intellect = 0
         self.hp = 100
+        self.max_hp = 100
         self.old_hp = 100
         self.dmg = 10
         self.old_dmg = 10
         self.mp = 50
+        self.max_mp = 50
         self.old_mp = 50
         self.amp_mag_dmg = 0
         self.old_amp_mag_dmg = 0
@@ -36,9 +38,10 @@ class Character:
         print('МЕНЮ')
         print('Информация о персонаже:       1')
         print('Отправиться в путь:           2')
+        print('Отдохнуть:                    3')
         if self.points > 0:
             a = True
-            print('Поднять уровень:              3')
+            print('Поднять уровень:              4')
         choose = input()
         match choose:
             case '1':
@@ -46,6 +49,8 @@ class Character:
             case '2':
                 scenario_1()
             case '3':
+                self.chill()
+            case '4':
                 if a:
                     self.lvl_up()
                 else:
@@ -69,7 +74,7 @@ class Character:
         print('Мана:                        ', self.mp)
         print('Колдовство:                  ', self.amp_mag_dmg, '%')
         print('Броня:                       ', self.armor)
-        print('Сопротивление магии:         ', self.mag_resist, '%')
+        print('Сопротивление магии:         ', self.mag_resist * 100, '%')
         print('Умения:                      ', self.skills)
         self.menu()
 
@@ -82,8 +87,8 @@ class Character:
     def strength_bonus(self):
         if self.old_strength < self.strength:
             a = self.strength - self.old_strength
-            self.hp += 10 * a
-            self.mag_resist += 0.1 * a
+            self.max_hp += 10 * a
+            self.mag_resist += 0.001 * a
             self.old_strength = self.strength
 
     def agility_bonus(self):
@@ -94,8 +99,8 @@ class Character:
             self.old_agility = self.agility
 
     def intellect_bonus(self):
-        self.mp += 5 * self.intellect
-        self.amp_mag_dmg += 0.2 * self.intellect
+        self.max_mp += 5 * self.intellect
+        self.amp_mag_dmg += 0.5 * self.intellect
 
     def armor_impact(self):
         damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
@@ -114,6 +119,35 @@ class Character:
                 self.intellect += value
                 self.intellect_bonus()
 
+    def calculate_max_hp(self):
+        self.max_hp = 100
+        self.max_hp += self.strength * 10
+        return self.max_hp
+
+    def calculate_max_mp(self):
+        self.max_mp = 50
+        self.max_mp += self.intellect * 5
+        return self.max_mp
+
+    def restoration(self):
+        self.hp = self.calculate_max_hp()
+        self.mp = self.calculate_max_mp()
+
+    def chill(self):
+        if self.hp == self.max_hp and self.mp == self.max_mp:
+            print('\nВы чувствуете себя хорошо')
+            self.menu()
+        else:
+            print('Вы решили немного покимарить', end='')
+            for i in range(5):
+                i += 1
+                time.sleep(1)
+                print('.', end='')
+            self.restoration()
+            print('\nВы чувствуете что хорошо отдохнули')
+            self.menu()
+
+
     def lvl_up(self):
         increase = 10
         print('Какой атрибут вы желаете увеличить на {0} единиц?'.format(increase))
@@ -128,16 +162,19 @@ class Character:
                 print('Сила увеличена на {0}!'.format(increase))
                 self.points -= 1
                 self.lvl += 1
+                self.restoration()
             case '2':
                 self.change_attribute('agility', increase)
                 print('Ловкость увеличена на {0}!'.format(increase))
                 self.points -= 1
                 self.lvl += 1
+                self.restoration()
             case '3':
                 self.change_attribute('intellect', increase)
                 print('Интеллект увеличен на {0}!'.format(increase))
                 self.points -= 1
                 self.lvl += 1
+                self.restoration()
             case '4':
                 print('Cила увеличивает живучесть и устойчивость к магии')
                 print('Ловкость оттачивает ваши атаки и смягчает получаемые удары')
@@ -168,7 +205,6 @@ class Character:
     def take_attack(self, attack):
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact, 0)
-        self.old_hp = self.hp
         return round(impact, 0)
 
 
@@ -191,7 +227,7 @@ class Enemy:
                 self.hp = 200
                 self.dmg = 15
                 self.mp = 20
-                self.mag_resist = 0.1
+                self.mag_resist = 0.15
 
     def all_info(self):
         match self.name:
@@ -201,7 +237,7 @@ class Enemy:
         print('Урон:                        ', self.dmg)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
-        print('Сопротивление магии:         ', self.mag_resist, '%')
+        print('Сопротивление магии:         ', self.mag_resist * 100, '%')
 
     def battle_info(self):
         match self.name:
@@ -312,20 +348,27 @@ def battle(enemy):
         if len(duration) > 0:
             print(duration)
     if enemy.hp < 0:
-        print('Вы победили!')
-        person.menu()
+        print('\nВы победили!\n')
     else:
-        print('Вы проиграли, игра окончена...')
+        print('\nВы проиграли, игра окончена...')
         time.sleep(5)
         exit()
 
 def scenario_1():
     print('')
     # тут должна быть функция, вызывающего рандомного слабого врага. Пока просто гоблин
-    goblin_1 = Enemy('goblin')
+    easy_enemy_1 = Enemy('goblin')
     print('Вы встретили Гоблина', )
-    goblin_1.all_info()
-    battle(goblin_1)
+    easy_enemy_1.all_info()
+    battle(easy_enemy_1)
+    # динамическая функция награды за противника
+    print('Вы встретили Гоблина', )
+    easy_enemy_2 = Enemy('goblin')
+    easy_enemy_2.all_info()
+    battle(easy_enemy_2)
+    print('После небольшого путешествия вы возвращаетесь домой')
+    # функция хаба
+    person.menu()
 
 person = Character()
 person.menu()
