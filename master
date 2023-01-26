@@ -7,28 +7,28 @@ class Character:
         print('Введите имя для своего персонажа')
         self.name = input()
         self.strength = 0
-        self.old_strength = 0
+        self.old_strength = 0  # Не используется
         self.agility = 0
-        self.old_agility = 0
+        self.old_agility = 0  # Не используется
         self.intellect = 0
-        self.old_intellect = 0
+        self.old_intellect = 0  # Не используется
         self.hp = 100
         self.max_hp = 100
-        self.old_hp = 100
+        self.old_hp = 100  # Не используется
         self.dmg = 10
-        self.old_dmg = 10
+        self.old_dmg = 10  # Не используется
         self.mp = 50
         self.max_mp = 50
-        self.old_mp = 50
+        self.old_mp = 50  # Не используется
         self.amp_mag_dmg = 0
-        self.old_amp_mag_dmg = 0
+        self.old_amp_mag_dmg = 0  # Не используется
         self.armor = 0
-        self.old_armor = 0
-        self.mag_resist = 0.25
-        self.old_mag_resist = 0
+        self.old_armor = 0  # Не используется
+        self.mag_resist = 0.1
+        self.old_mag_resist = 0  # Не используется
         self.lvl = 1
-        self.points = 1
-        self.skills = []
+        self.points = 3
+        self.skills = ['stone_skin']
         self.name_list = []
         self.number_skill = 0
 
@@ -74,8 +74,8 @@ class Character:
         print('Мана:                        ', self.mp)
         print('Колдовство:                  ', self.amp_mag_dmg, '%')
         print('Броня:                       ', self.armor)
-        print('Сопротивление магии:         ', self.mag_resist * 100, '%')
-        print('Умения:                      ', self.skills)
+        print('Сопротивление магии:         ', round(self.mag_resist, 3) * 100, '%')
+        print('Умения:                      ', self.name_list)
         self.menu()
 
     def battle_info(self):
@@ -84,40 +84,50 @@ class Character:
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
 
-    def strength_bonus(self):
-        if self.old_strength < self.strength:
-            a = self.strength - self.old_strength
-            self.max_hp += 10 * a
-            self.mag_resist += 0.001 * a
-            self.old_strength = self.strength
+    # def strength_bonus(self):
+    #     if self.old_strength < self.strength:
+    #         a = self.strength - self.old_strength
+    #         self.max_hp += 10 * a
+    #         self.mag_resist += 0.001 * a
+    #         self.old_strength = self.strength
 
-    def agility_bonus(self):
-        if self.old_agility < self.agility:
-            a = self.agility - self.old_agility
-            self.dmg += 1 * a
-            self.armor += 0.25 * a
-            self.old_agility = self.agility
+    # def agility_bonus(self):
+    #     if self.old_agility < self.agility:
+    #         a = self.agility - self.old_agility
+    #         self.dmg += 1 * a
+    #         self.armor += 0.25 * a
+    #         self.old_agility = self.agility
 
-    def intellect_bonus(self):
-        self.max_mp += 5 * self.intellect
-        self.amp_mag_dmg += 0.5 * self.intellect
+    # def intellect_bonus(self):
+    #     self.max_mp += 5 * self.intellect
+    #     self.amp_mag_dmg += 0.5 * self.intellect
 
     def armor_impact(self):
         damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
-        # print('Physical damage reduction: ', damage_reduction, '%', sep='')
+        # print('Physical damage reduction: ', damage_reduction, '%', sep='')  #- Сделать активным для проверки формулы брони в бою
         return round(damage_reduction, 2)
 
     def change_attribute(self, attribute_name, value):
         match attribute_name:
             case 'strength':
                 self.strength += value
-                self.strength_bonus()
+                self.max_hp += 10 * value
+                if self.hp > self.max_hp:
+                    self.hp = self.max_hp
+                self.mag_resist += round((0.001 * value), 3)
+                # self.strength_bonus()
             case 'agility':
                 self.agility += value
-                self.agility_bonus()
+                self.dmg += 1 * value
+                self.armor += 0.25 * value
+                # self.agility_bonus()
             case 'intellect':
                 self.intellect += value
-                self.intellect_bonus()
+                self.max_mp += 5 * value
+                if self.mp > self.max_mp:
+                    self.mp = self.max_mp
+                self.amp_mag_dmg += 0.5 * value
+                # self.intellect_bonus()
 
     def calculate_max_hp(self):
         self.max_hp = 100
@@ -144,12 +154,12 @@ class Character:
                 time.sleep(1)
                 print('.', end='')
             self.restoration()
-            print('\nВы чувствуете что хорошо отдохнули')
+            print('\nВы проснулись и чувствуете что хорошо отдохнули')
             self.menu()
 
 
     def lvl_up(self):
-        increase = 10
+        increase = 5
         print('Какой атрибут вы желаете увеличить на {0} единиц?'.format(increase))
         print('                              1    Силу')
         print('                              2    Ловкость')
@@ -187,8 +197,8 @@ class Character:
                 print('Неопознанная команда, возвращение в меню...')
                 time.sleep(1)
                 self.menu()
+        skill.new()
         self.menu()
-        #self.create_skill().new(person)
 
     # def create_skill(self):
     #     self.number_skill += 1
@@ -258,12 +268,20 @@ class Enemy:
 
 
 class Skill:
-    #skills = {'stone_skin': StoneSkin}
-    skill_list: dict[str, int] = {'duration_stone_skin_1': 3, 'reload_stone_skin_1': 5}
-    name = 'not have'
+    timer_list: dict[str, int] = \
+    {
+    'duration_stone_skin_1': 3, 'reload_stone_skin_1': 5,
+    'duration_stone_skin_2': 4, 'reload_stone_skin_2': 5,
+    'duration_stone_skin_3': 5, 'reload_stone_skin_3': 5,
+    }
     cost = 0
-    def __init__(self, name):
-        self.name = name
+    #name = 'not have'
+    def __init__(self):
+        self.skills = \
+    {
+        'stone_skin': self.StoneSkin, 'other_skill_1': 'method_other_skill_1',
+        'other_skill_2': 'method_other_skill_2', 'other_skill_3': 'method_other_skill_3'
+    }
 
     # type = []
     # base_list = []
@@ -280,25 +298,35 @@ class Skill:
     # dark_list = []
     # pure_list = []
 
-    def new(self, person):
+    def new(self):
         print('Выберете способность для изучения')
+
+        # for i in person.skills:  # - Блок показывает какие способности изучены, а какие ещё нет
+        #     for key in self.skills:
+        #         if i != key:
+        #             print('Unexplored skills:', key)
+        #         elif i == 'stone_skin':
+        #             print('Explored skills:', key)
+
         if person.lvl == 2:
             print('1 - Каменная кожа. 1ур')
             a = input()
             match a:
                 case '1':
-                    person.skills.append('Каменная кожа. 1ур')
+                    person.name_list.append('Каменная кожа. 1ур')
 
-    def StoneSkin_1(self, user):
+    def StoneSkin(self, user):
         self.cost = 20
         if user.mp >= self.cost:
             user.mp -= self.cost
             user.armor += 4
             print('Вы покрыли себя камнем и потратили на это {0} маны'.format(self.cost))
-            return self.skill_list.get('duration_stone_skin_1', 'reload_stone_skin_1')
+            return self.timer_list.get('duration_stone_skin_1', 'reload_stone_skin_1')
         print('Не хватает маны')
 
-    def UnStoneSkin_1(user):
+    def UnStoneSkin_1(user):    # Может реализовать систему эффектов? При прохождении таймера запускается скрипт поиска
+                                # эффекта на игроке, который при совпадении  имён способностей запустит нужный скрипт
+                                # развеивания. Либо оставить как есть
         user.armor -= 4
         print("Каменная кожа утратила свою силу")
 
@@ -370,6 +398,8 @@ def scenario_1():
     # функция хаба
     person.menu()
 
+
+skill = Skill()
 person = Character()
 person.menu()
 #person.create_skill()
