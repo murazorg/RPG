@@ -28,7 +28,7 @@ class Character:
         self.old_mag_resist = 0  # Не используется
         self.lvl = 1
         self.points = 3
-        self.skills = ['stone_skin']
+        self.skills = []
         self.name_list = []
         self.number_skill = 0
 
@@ -79,7 +79,7 @@ class Character:
         self.menu()
 
     def battle_info(self):
-        print('Имя:', self.name)
+        print('\nИмя:', self.name)
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
@@ -229,7 +229,7 @@ class Enemy:
         self.name = name
         match self.name:
             case 'goblin':
-                self.hp = 50
+                self.hp = 250
                 self.dmg = 5
                 self.armor = 2
                 self.mag_resist = 0.1
@@ -268,13 +268,6 @@ class Enemy:
 
 
 class Skill:
-    timer_list: dict[str, int] = \
-    {
-    'duration_stone_skin_1': 3, 'reload_stone_skin_1': 5,
-    'duration_stone_skin_2': 4, 'reload_stone_skin_2': 5,
-    'duration_stone_skin_3': 5, 'reload_stone_skin_3': 5,
-    }
-    cost = 0
     #name = 'not have'
     def __init__(self):
         self.skills = \
@@ -282,6 +275,11 @@ class Skill:
         'stone_skin': self.StoneSkin, 'other_skill_1': 'method_other_skill_1',
         'other_skill_2': 'method_other_skill_2', 'other_skill_3': 'method_other_skill_3'
     }
+        self.time_list = \
+            [
+                [3, 5], [4, 5], [5, 5]
+            ]
+        self.cost = 0
 
     # type = []
     # base_list = []
@@ -308,56 +306,87 @@ class Skill:
         #         elif i == 'stone_skin':
         #             print('Explored skills:', key)
 
-        if person.lvl == 2:
+        if len(person.skills) == 0:
             print('1 - Каменная кожа. 1ур')
             a = input()
             match a:
                 case '1':
                     person.name_list.append('Каменная кожа. 1ур')
+                    person.skills.append('stone_skin')
 
-    def StoneSkin(self, user):
-        self.cost = 20
-        if user.mp >= self.cost:
-            user.mp -= self.cost
-            user.armor += 4
-            print('Вы покрыли себя камнем и потратили на это {0} маны'.format(self.cost))
-            return self.timer_list.get('duration_stone_skin_1', 'reload_stone_skin_1')
-        print('Не хватает маны')
+    def mana_check(self, id):
+        match id:
+            case 'StoneSkin':
+                self.cost = 20
+                if person.mp >= self.cost:
+                    return True
+                print('Не хватает маны')
+                return False
 
-    def UnStoneSkin_1(user):    # Может реализовать систему эффектов? При прохождении таймера запускается скрипт поиска
+    def StoneSkin(self):
+        self.mana_check('StoneSkin')
+        if True:
+            person.mp -= self.cost
+            person.armor += 4
+            print('Вы покрыли себя камнем и затратили на это {0} маны'.format(self.cost))
+            # a = self.timer_list.get('stone_skin_1')
+            # b = self.timer_list.get('stone_skin_2')
+            # a.update(b)
+            return self.time_list[0]
+
+
+    def UnStoneSkin(self, user):    # Может реализовать систему эффектов? При прохождении таймера запускается скрипт поиска
                                 # эффекта на игроке, который при совпадении  имён способностей запустит нужный скрипт
                                 # развеивания. Либо оставить как есть
         user.armor -= 4
-        print("Каменная кожа утратила свою силу")
+        #print("Каменная кожа утратила свою силу")
+
+def skill_id(id):
+    name = 'YOU ARE ABOBA'
+    match id:
+        case 0:
+            name = 'Каменная кожа'
+    return name
 
 def check(timer):
-    if sum(1 for i in timer.values())>0:
-            for i in range(len(timer)):
-                a = timer.get('duration')
-                a -= 1
-                if timer['duration'] > 0:
-                    print('Оставшаяся длительность {0}: {1}'.format(i + 1, timer['duration']))
-    if 0 in timer.values():
-        print('Умение {0} перестало действовать'.format(timer.index(0) + 1))
-        while timer.count(0) > 0:
-            timer.remove(0)
-            # match timer:
-            #     case timer.index(skin_stone_1) = 0:
-            #         Skill.UnStoneSkin_1(person)
+    for i in timer:
+        if i != False:
+            i[0] -= 1
+            i[1] -= 1
+            if i[0] > 0:
+                print('Оставшаяся длительность {0}: {1}'.format(skill_id(timer.index(i)), i[0]))
+            elif i[0] == 0:
+                print('Умение {0} перестало действовать'.format(skill_id(timer.index(i))))
+                skill.UnStoneSkin(person)
+            elif i[1] == 0:
+                print('Умение {0} снова доступно'.format(skill_id(timer.index(i))))
+                #timer.remove(i)
+                index = timer.index(i)
+                timer[index] = False
+                #del timer[index]
+                #timer.pop(timer.index(i))
+                #i.clear()
+        break
 
 def skill_number():
     skill_number = 2
-    for key in person.skills:
-        print('{0}          {1}'.format(skill_number, key))
+    for key in person.name_list:
+        print('                              {0}    {1}'.format(skill_number, key))
         skill_number += 1
 
 def battle(enemy):
     count = 1
-    duration: dict[str, int] = dict()
+    duration = [False, False, False]
     while enemy.hp > 0 and person.hp > 0:
+        # skill.time_list = \
+        #     [
+        #         [3, 5], [4, 5], [5, 5]
+        #     ]
         check(duration)
-        print('Ход {0} как вы поступите?'.format(count))
-        print('1            Атаковать')
+        person.battle_info()
+        enemy.battle_info()
+        print('\nХод {0} как вы поступите?'.format(count))
+        print('                              1    Атаковать')
         skill_number()
         choose = input()
         match choose:
@@ -365,16 +394,16 @@ def battle(enemy):
                 a = enemy.take_attack(person.dmg)
                 print(enemy.name, 'получил', a, 'урона')
             case '2':
-                duration = skill_1.StoneSkin_1(person)
+                a = skill.StoneSkin()
+                if a != None: duration[0] = a
             case _:
                 continue
         b = person.take_attack(enemy.dmg)
         print('Вы получили', b, 'урона')
-        person.battle_info()
-        enemy.battle_info()
         count += 1
-        if len(duration) > 0:
+        if len(duration) > 0:  # Для откладки duration
             print(duration)
+            print(skill.time_list)
     if enemy.hp < 0:
         print('\nВы победили!\n')
     else:
@@ -384,23 +413,20 @@ def battle(enemy):
 
 def scenario_1():
     print('')
-    # тут должна быть функция, вызывающего рандомного слабого врага. Пока просто гоблин
+    # Здесь должна быть функция случайного слабого врага. Пока просто гоблин
     easy_enemy_1 = Enemy('goblin')
     print('Вы встретили Гоблина', )
     easy_enemy_1.all_info()
     battle(easy_enemy_1)
-    # динамическая функция награды за противника
+    # Здесь должна быть динамическая функция награды за противника
     print('Вы встретили Гоблина', )
     easy_enemy_2 = Enemy('goblin')
     easy_enemy_2.all_info()
     battle(easy_enemy_2)
     print('После небольшого путешествия вы возвращаетесь домой')
-    # функция хаба
+    # Здесь должна быть функция хаба
     person.menu()
-
 
 skill = Skill()
 person = Character()
 person.menu()
-#person.create_skill()
-#print(skill_1.name)
