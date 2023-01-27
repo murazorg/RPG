@@ -31,6 +31,7 @@ class Character:
         self.skills = []
         self.name_list = []
         self.number_skill = 0
+        self.duration = [False, False, False]
 
     def menu(self):
         a = False
@@ -83,6 +84,7 @@ class Character:
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
+        print('Эффективность Брони:         ', self.armor_impact() * 100, '%')
 
     # def strength_bonus(self):
     #     if self.old_strength < self.strength:
@@ -230,7 +232,7 @@ class Enemy:
         match self.name:
             case 'goblin':
                 self.hp = 250
-                self.dmg = 5
+                self.dmg = 10
                 self.armor = 2
                 self.mag_resist = 0.1
             case 'orc':
@@ -320,12 +322,12 @@ class Skill:
                 self.cost = 20
                 if person.mp >= self.cost:
                     return True
-                print('Не хватает маны')
-                return False
+                else:
+                    print('Не хватает маны')
+                    return False
 
     def StoneSkin(self):
-        self.mana_check('StoneSkin')
-        if True:
+        if self.mana_check('StoneSkin'):
             person.mp -= self.cost
             person.armor += 4
             print('Вы покрыли себя камнем и затратили на это {0} маны'.format(self.cost))
@@ -333,6 +335,8 @@ class Skill:
             # b = self.timer_list.get('stone_skin_2')
             # a.update(b)
             return self.time_list[0]
+        else:
+            return False
 
 
     def UnStoneSkin(self, user):    # Может реализовать систему эффектов? При прохождении таймера запускается скрипт поиска
@@ -371,18 +375,24 @@ def check(timer):
 def skill_number():
     skill_number = 2
     for key in person.name_list:
+        if person.duration[0]!=False:
+            if person.duration[0][1] != skill.time_list[0][1]:
+                continue
+            else:
+                print('                              {0}    {1}'.format(skill_number, key))
+                skill_number += 1
         print('                              {0}    {1}'.format(skill_number, key))
         skill_number += 1
 
 def battle(enemy):
     count = 1
-    duration = [False, False, False]
+    person.duration = [False, False, False]
     while enemy.hp > 0 and person.hp > 0:
-        # skill.time_list = \
-        #     [
-        #         [3, 5], [4, 5], [5, 5]
-        #     ]
-        check(duration)
+        skill.time_list = \
+            [
+                [3, 5], [4, 5], [5, 5]
+            ]
+        check(person.duration)
         person.battle_info()
         enemy.battle_info()
         print('\nХод {0} как вы поступите?'.format(count))
@@ -395,14 +405,14 @@ def battle(enemy):
                 print(enemy.name, 'получил', a, 'урона')
             case '2':
                 a = skill.StoneSkin()
-                if a != None: duration[0] = a
+                person.duration[0] = a
             case _:
                 continue
         b = person.take_attack(enemy.dmg)
         print('Вы получили', b, 'урона')
         count += 1
-        if len(duration) > 0:  # Для откладки duration
-            print(duration)
+        if len(person.duration) > 0:  # Для откладки duration
+            print(person.duration)
             print(skill.time_list)
     if enemy.hp < 0:
         print('\nВы победили!\n')
