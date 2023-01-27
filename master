@@ -233,12 +233,14 @@ class Enemy:
             case 'goblin':
                 self.hp = 250
                 self.dmg = 10
+                self.mp = 0
                 self.armor = 2
                 self.mag_resist = 0.1
             case 'orc':
                 self.hp = 200
                 self.dmg = 15
                 self.mp = 20
+                self.armor = 8
                 self.mag_resist = 0.15
 
     def all_info(self):
@@ -254,7 +256,7 @@ class Enemy:
     def battle_info(self):
         match self.name:
             case 'goblin':
-                print('Гоблин:')
+                print('\nГоблин:')
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
@@ -268,6 +270,11 @@ class Enemy:
         self.hp -= round(impact, 0)
         return round(impact, 0)
 
+    def take_mag_attack(self, mag_attack):
+        impact = (mag_attack * (1 + (person.amp_mag_dmg / 100))) * (1 - self.mag_resist)
+        self.hp -= round(impact, 0)
+        return round(impact, 0)
+
 
 class Skill:
     #name = 'not have'
@@ -275,11 +282,11 @@ class Skill:
         self.skills = \
     {
         'stone_skin': self.StoneSkin, 'other_skill_1': 'method_other_skill_1',
-        'other_skill_2': 'method_other_skill_2', 'other_skill_3': 'method_other_skill_3'
+        'other_skill_2': 'method_other_skill_2', 'earth_spike': self.EarthSpike
     }
         self.time_list = \
             [
-                [3, 5], [4, 5], [5, 5]
+                [3, 5], [4, 5], [5, 5], [1, 1]
             ]
         self.cost = 0
 
@@ -310,16 +317,27 @@ class Skill:
 
         if len(person.skills) == 0:
             print('1 - Каменная кожа. 1ур')
+            print('2 - Земляные шипы. 1ур')
             a = input()
             match a:
                 case '1':
                     person.name_list.append('Каменная кожа. 1ур')
                     person.skills.append('stone_skin')
+                case '2':
+                    person.name_list.append('Земляные шипы. 1ур')
+                    person.skills.append('earth_spike')
 
     def mana_check(self, id):
         match id:
             case 'StoneSkin':
                 self.cost = 20
+                if person.mp >= self.cost:
+                    return True
+                else:
+                    print('Не хватает маны')
+                    return False
+            case 'EarthSpike':
+                self.cost = 15
                 if person.mp >= self.cost:
                     return True
                 else:
@@ -338,6 +356,18 @@ class Skill:
         else:
             return False
 
+    def EarthSpike(self, enemy):
+        if self.mana_check('EarthSpike'):
+            person.mp -= self.cost
+            old_hp = enemy.hp
+            enemy.take_mag_attack(25)
+            dmg = old_hp - enemy.hp
+            print('Земляные пики разверзлись под противником и нанесли ему {1} урона. '
+                  'Вы затратили на это {0} маны'.format(self.cost, dmg))
+            return self.time_list[3]
+        else:
+            return False
+
 
     def UnStoneSkin(self, user):    # Может реализовать систему эффектов? При прохождении таймера запускается скрипт поиска
                                 # эффекта на игроке, который при совпадении  имён способностей запустит нужный скрипт
@@ -350,6 +380,8 @@ def skill_id(id):
     match id:
         case 0:
             name = 'Каменная кожа'
+        case 3:
+            name = 'Земляные шипы'
     return name
 
 def check(timer):
@@ -370,13 +402,13 @@ def check(timer):
                 #del timer[index]
                 #timer.pop(timer.index(i))
                 #i.clear()
-        break
+        continue
 
 def skill_number():
     skill_number = 2
     for key in person.name_list:
-        if person.duration[0]!=False:
-            if person.duration[0][1] != skill.time_list[0][1]:
+        if person.duration[person.name_list.index(key)]!=False:
+            if person.duration[person.name_list.index(key)][1] != skill.time_list[person.name_list.index(key)][1]:
                 continue
             else:
                 print('                              {0}    {1}'.format(skill_number, key))
@@ -386,11 +418,11 @@ def skill_number():
 
 def battle(enemy):
     count = 1
-    person.duration = [False, False, False]
+    person.duration = [False, False, False, False]
     while enemy.hp > 0 and person.hp > 0:
         skill.time_list = \
             [
-                [3, 5], [4, 5], [5, 5]
+                [3, 5], [4, 5], [5, 5], [0, 1]
             ]
         check(person.duration)
         person.battle_info()
@@ -401,11 +433,14 @@ def battle(enemy):
         choose = input()
         match choose:
             case '1':
-                a = enemy.take_attack(person.dmg)
-                print(enemy.name, 'получил', a, 'урона')
+                person_move = enemy.take_attack(person.dmg)
+                print(enemy.name, 'получил', person_move, 'урона')
             case '2':
-                a = skill.StoneSkin()
-                person.duration[0] = a
+                person_move = skill.StoneSkin()
+                person.duration[0] = person_move
+            case '5':
+                person_move = skill.EarthSpike(enemy)
+                person.duration[3] = person_move
             case _:
                 continue
         b = person.take_attack(enemy.dmg)
@@ -424,19 +459,20 @@ def battle(enemy):
 def scenario_1():
     print('')
     # Здесь должна быть функция случайного слабого врага. Пока просто гоблин
-    easy_enemy_1 = Enemy('goblin')
+    enemy = Enemy('goblin')
     print('Вы встретили Гоблина', )
-    easy_enemy_1.all_info()
-    battle(easy_enemy_1)
+    enemy.all_info()
+    battle(enemy)
     # Здесь должна быть динамическая функция награды за противника
     print('Вы встретили Гоблина', )
-    easy_enemy_2 = Enemy('goblin')
-    easy_enemy_2.all_info()
-    battle(easy_enemy_2)
+    enemy = Enemy('goblin')
+    enemy.all_info()
+    battle(enemy)
     print('После небольшого путешествия вы возвращаетесь домой')
     # Здесь должна быть функция хаба
     person.menu()
 
+enemy = Enemy('None')
 skill = Skill()
 person = Character()
 person.menu()
