@@ -1,4 +1,5 @@
 import time
+from copy import deepcopy
 #from typing import Dict
 
 
@@ -29,9 +30,9 @@ class Character:
         self.lvl = 1
         self.points = 3
         self.skills = []
-        self.name_list = []
+        self.name_list = [False, False, False, False]
         self.number_skill = 0
-        self.duration = [False, False, False]
+        self.duration = [False, False, False, False]
 
     def menu(self):
         a = False
@@ -61,6 +62,12 @@ class Character:
                 time.sleep(1)
                 self.menu()
 
+    def print_skills(self):
+        a = []
+        for item in self.name_list:
+            if item:
+                a.append(item)
+        return a
 
     def all_info(self):
         print('')
@@ -76,7 +83,8 @@ class Character:
         print('Колдовство:                  ', self.amp_mag_dmg, '%')
         print('Броня:                       ', self.armor)
         print('Сопротивление магии:         ', round(self.mag_resist, 3) * 100, '%')
-        print('Умения:                      ', self.name_list)
+        print('Умения:                      ', self.print_skills())
+        print('Все умения:             ', self.name_list)  # Откладка скиллов
         self.menu()
 
     def battle_info(self):
@@ -202,18 +210,6 @@ class Character:
         skill.new()
         self.menu()
 
-    # def create_skill(self):
-    #     self.number_skill += 1
-    #     exec('skill_%d = Skill()' %)
-    #     return skills[self.number_skill - 1]
-
-    # def create_skill(self):
-    #     for i in range(5):
-    #         self.number_skill += 1
-    #         skills = [Skill(f"skill_{self.number_skill}")]
-    #         print(skills[self.number_skill - 1].name)
-    #         return skills[self.number_skill-1]
-
     def take_attack(self, attack):
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact, 0)
@@ -321,10 +317,10 @@ class Skill:
             a = input()
             match a:
                 case '1':
-                    person.name_list.append('Каменная кожа. 1ур')
+                    person.name_list[0] = 'Каменная кожа. 1ур'
                     person.skills.append('stone_skin')
                 case '2':
-                    person.name_list.append('Земляные шипы. 1ур')
+                    person.name_list[3] = 'Земляные шипы. 1ур'
                     person.skills.append('earth_spike')
 
     def mana_check(self, id):
@@ -396,25 +392,46 @@ def check(timer):
                 skill.UnStoneSkin(person)
             elif i[1] == 0:
                 print('Умение {0} снова доступно'.format(skill_id(timer.index(i))))
-                #timer.remove(i)
                 index = timer.index(i)
                 timer[index] = False
-                #del timer[index]
-                #timer.pop(timer.index(i))
-                #i.clear()
         continue
 
 def skill_number():
-    skill_number = 2
-    for key in person.name_list:
-        if person.duration[person.name_list.index(key)]!=False:
-            if person.duration[person.name_list.index(key)][1] != skill.time_list[person.name_list.index(key)][1]:
-                continue
-            else:
-                print('                              {0}    {1}'.format(skill_number, key))
-                skill_number += 1
-        print('                              {0}    {1}'.format(skill_number, key))
-        skill_number += 1
+    skill_list = deepcopy(person.name_list)
+    for item in skill_list:
+        if item:  # Скилл изучен
+            if person.duration[skill_list.index(item)] is False:  # Его метод не применялся
+                match skill_list.index(item):
+                    case 0 | 1 | 2:  # stone_skin
+                        print('                              1    {0}'.format(item))
+                    case 3 | 4 | 5:  # earth_spike
+                        print('                              2    {0}'.format(item))
+
+def ABOBA():
+    skill_number = 1
+    for item in person.name_list:
+        if item:  # Скилл изучен
+            if person.duration[person.name_list.index(item)]:  # Скилл применился
+                if person.duration[person.name_list.index(item)][1] != skill.time_list[person.name_list.index(item)][1]:
+                    continue  # Скилл ещё на кд
+                else:  # Скилл действует
+                    print('                              {0}    {1}'.format(skill_number, item))
+                    skill_number += 1
+            print('                              {0}    {1}'.format(skill_number, item))
+            skill_number += 1
+
+def select_skill():
+    skill_number()
+    choose = input()
+    match choose:
+        case '1':
+            person_move = skill.StoneSkin()
+            person.duration[0] = person_move
+        case '2':
+            person_move = skill.EarthSpike(enemy)
+            person.duration[3] = person_move
+        case _:
+            pass
 
 def battle(enemy):
     count = 1
@@ -429,18 +446,14 @@ def battle(enemy):
         enemy.battle_info()
         print('\nХод {0} как вы поступите?'.format(count))
         print('                              1    Атаковать')
-        skill_number()
+        print('                              2    Использовать способность')
         choose = input()
         match choose:
             case '1':
                 person_move = enemy.take_attack(person.dmg)
                 print(enemy.name, 'получил', person_move, 'урона')
             case '2':
-                person_move = skill.StoneSkin()
-                person.duration[0] = person_move
-            case '5':
-                person_move = skill.EarthSpike(enemy)
-                person.duration[3] = person_move
+                select_skill()
             case _:
                 continue
         b = person.take_attack(enemy.dmg)
