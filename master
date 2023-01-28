@@ -379,13 +379,13 @@ class Skill:
                     return True
                 else:
                     return False
-            case 3:
+            case 4:
                 self.cost = 30
                 if person.mp >= self.cost:
                     return True
                 else:
                     return False
-            case 3:
+            case 5:
                 self.cost = 45
                 if person.mp >= self.cost:
                     return True
@@ -472,8 +472,6 @@ def skill_id(skill_id):
     match skill_id:
         case 0 | 1 | 2:
             name = 'Каменная кожа'
-        case 3 | 4 | 5:
-            name = 'Земляные шипы'
     return name
 
 
@@ -495,21 +493,22 @@ def check(timer):
 
 
 def skill_number():
-    for item in person.name_list:
+    for item in reversed(person.name_list[0:3]):
         if item:  # Скилл изучен
             if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
-                if skill.mana_check(person.name_list.index(item)):  #  Сделать деление на аспекты, для простоты
-                    match person.name_list.index(item):
-                        case 0 | 1 | 2:  # stone_skin
-                            print('                              1    {0}'.format(item))
-                        case 3 | 4 | 5:  # earth_spike
-                            print('                              2    {0}'.format(item))
+                if skill.mana_check(person.name_list.index(item)):
+                    print('                              1    {0}'.format(item))
                 else:
-                    match person.name_list.index(item):
-                        case 0 | 1 | 2:  # stone_skin
-                            print('Недостаточно маны!            1    {0}'.format(item))
-                        case 3 | 4 | 5:  # earth_spike
-                            print('Недостаточно маны!            2    {0}'.format(item))
+                    print('Недостаточно маны!            1    {0}'.format(item))
+                break
+    for item in reversed(person.name_list[3:6]):
+        if item:  # Скилл изучен
+            if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
+                if skill.mana_check(person.name_list.index(item)):
+                    print('                              2    {0}'.format(item))
+                else:
+                    print('Недостаточно маны!            2    {0}'.format(item))
+                break
 
 
 def select_skill(enemy):
