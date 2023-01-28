@@ -266,7 +266,7 @@ class Enemy:
         self.hp -= round(impact, 0)
         return round(impact, 0)
 
-    def take_mag_attack(self, mag_attack):
+    def take_mag_attack(self, mag_attack: int):
         impact = (mag_attack * (1 + (person.amp_mag_dmg / 100))) * (1 - self.mag_resist)
         self.hp -= round(impact, 0)
         return round(impact, 0)
@@ -325,23 +325,21 @@ class Skill:
 
     def mana_check(self, id):
         match id:
-            case 'StoneSkin':
+            case 0:
                 self.cost = 20
                 if person.mp >= self.cost:
                     return True
                 else:
-                    print('Не хватает маны')
                     return False
-            case 'EarthSpike':
+            case 3:
                 self.cost = 15
                 if person.mp >= self.cost:
                     return True
                 else:
-                    print('Не хватает маны')
                     return False
 
     def StoneSkin(self):
-        if self.mana_check('StoneSkin'):
+        if self.mana_check(0):
             person.mp -= self.cost
             person.armor += 4
             print('Вы покрыли себя камнем и затратили на это {0} маны'.format(self.cost))
@@ -350,18 +348,20 @@ class Skill:
             # a.update(b)
             return self.time_list[0]
         else:
+            print('Не получилось прочесть заклинание')
             return False
 
     def EarthSpike(self, enemy):
-        if self.mana_check('EarthSpike'):
+        if self.mana_check(3):
             person.mp -= self.cost
-            old_hp = enemy.hp
-            enemy.take_mag_attack(25)
-            dmg = old_hp - enemy.hp
+            # old_hp = enemy.hp
+            dmg = enemy.take_mag_attack(25)
+            # dmg = old_hp - enemy.hp
             print('Земляные пики разверзлись под противником и нанесли ему {1} урона. '
                   'Вы затратили на это {0} маны'.format(self.cost, dmg))
             return self.time_list[3]
         else:
+            print('Не получилось прочесть заклинание')
             return False
 
 
@@ -401,26 +401,21 @@ def skill_number():
     for item in skill_list:
         if item:  # Скилл изучен
             if person.duration[skill_list.index(item)] is False:  # Его метод не применялся
-                match skill_list.index(item):
-                    case 0 | 1 | 2:  # stone_skin
-                        print('                              1    {0}'.format(item))
-                    case 3 | 4 | 5:  # earth_spike
-                        print('                              2    {0}'.format(item))
+                if skill.mana_check(skill_list.index(item)):
+                    match skill_list.index(item):
+                        case 0 | 1 | 2:  # stone_skin
+                            print('                              1    {0}'.format(item))
+                        case 3 | 4 | 5:  # earth_spike
+                            print('                              2    {0}'.format(item))
+                else:
+                    match skill_list.index(item):
+                        case 0 | 1 | 2:  # stone_skin
+                            print('Недостаточно маны!            1    {0}'.format(item))
+                        case 3 | 4 | 5:  # earth_spike
+                            print('Недостаточно маны!            2    {0}'.format(item))
 
-def ABOBA():
-    skill_number = 1
-    for item in person.name_list:
-        if item:  # Скилл изучен
-            if person.duration[person.name_list.index(item)]:  # Скилл применился
-                if person.duration[person.name_list.index(item)][1] != skill.time_list[person.name_list.index(item)][1]:
-                    continue  # Скилл ещё на кд
-                else:  # Скилл действует
-                    print('                              {0}    {1}'.format(skill_number, item))
-                    skill_number += 1
-            print('                              {0}    {1}'.format(skill_number, item))
-            skill_number += 1
 
-def select_skill():
+def select_skill(enemy):
     skill_number()
     choose = input()
     match choose:
@@ -453,7 +448,7 @@ def battle(enemy):
                 person_move = enemy.take_attack(person.dmg)
                 print(enemy.name, 'получил', person_move, 'урона')
             case '2':
-                select_skill()
+                select_skill(enemy)
             case _:
                 continue
         b = person.take_attack(enemy.dmg)
