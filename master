@@ -64,9 +64,14 @@ class Character:
 
     def print_skills(self):
         a = []
-        for item in self.name_list:
+        for item in reversed(self.name_list[0:3]):
             if item:
                 a.append(item)
+                break
+        for item in reversed(self.name_list[3:6]):
+            if item:
+                a.append(item)
+                break
         return a
 
     def all_info(self):
