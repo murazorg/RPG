@@ -30,9 +30,9 @@ class Character:
         self.lvl = 1
         self.points = 3
         self.skills = []
-        self.name_list = [False, False, False, False]
+        self.name_list = [False, False, False, False, False, False]
         self.number_skill = 0
-        self.duration = [False, False, False, False]
+        self.duration = [False, False, False, False, False, False]
 
     def menu(self):
         a = False
@@ -282,7 +282,7 @@ class Skill:
     }
         self.time_list = \
             [
-                [3, 5], [4, 5], [5, 5], [1, 1]
+                [3, 5], [4, 5], [5, 5], [0, 1], [0, 1], [0, 1]
             ]
         self.cost = 0
 
@@ -302,29 +302,37 @@ class Skill:
     # pure_list = []
 
     def new(self):
-        print('Выберете способность для изучения')
+        print('\nВыберете способность для изучения:')
+        number = 0
+        if person.name_list[0] is False:
+            number += 1
+            print('{0} - Каменная кожа. 1ур'.format(number))
+        if person.name_list[0]:
+            number += 1
+            print('{0} - Каменная кожа. 2ур'.format(number))
+        if person.name_list[1]:
+            number += 1
+            print('{0} - Каменная кожа. 3ур'.format(number))
+        if person.name_list[3] is False:
+            number += 1
+            print('{0} - Земляные шипы. 1ур'.format(number))
+        if person.name_list[3]:
+            number += 1
+            print('{0} - Земляные шипы. 2ур'.format(number))
+        if person.name_list[4]:
+            number += 1
+            print('{0} - Земляные шипы. 3ур'.format(number))
+        choice = input()
+        match choice:
+            case '1':
+                person.name_list[0] = 'Каменная кожа. 1ур'
+                person.skills.append('stone_skin')
+            case '2':
+                person.name_list[3] = 'Земляные шипы. 1ур'
+                person.skills.append('earth_spike')
 
-        # for i in person.skills:  # - Блок показывает какие способности изучены, а какие ещё нет
-        #     for key in self.skills:
-        #         if i != key:
-        #             print('Unexplored skills:', key)
-        #         elif i == 'stone_skin':
-        #             print('Explored skills:', key)
-
-        if len(person.skills) == 0:
-            print('1 - Каменная кожа. 1ур')
-            print('2 - Земляные шипы. 1ур')
-            a = input()
-            match a:
-                case '1':
-                    person.name_list[0] = 'Каменная кожа. 1ур'
-                    person.skills.append('stone_skin')
-                case '2':
-                    person.name_list[3] = 'Земляные шипы. 1ур'
-                    person.skills.append('earth_spike')
-
-    def mana_check(self, id):
-        match id:
+    def mana_check(self, id_skill):
+        match id_skill:
             case 0:
                 self.cost = 20
                 if person.mp >= self.cost:
@@ -397,18 +405,17 @@ def check(timer):
         continue
 
 def skill_number():
-    skill_list = deepcopy(person.name_list)
-    for item in skill_list:
+    for item in person.name_list:
         if item:  # Скилл изучен
-            if person.duration[skill_list.index(item)] is False:  # Его метод не применялся
-                if skill.mana_check(skill_list.index(item)):
-                    match skill_list.index(item):
+            if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
+                if skill.mana_check(person.name_list.index(item)):
+                    match person.name_list.index(item):
                         case 0 | 1 | 2:  # stone_skin
                             print('                              1    {0}'.format(item))
                         case 3 | 4 | 5:  # earth_spike
                             print('                              2    {0}'.format(item))
                 else:
-                    match skill_list.index(item):
+                    match person.name_list.index(item):
                         case 0 | 1 | 2:  # stone_skin
                             print('Недостаточно маны!            1    {0}'.format(item))
                         case 3 | 4 | 5:  # earth_spike
@@ -430,11 +437,11 @@ def select_skill(enemy):
 
 def battle(enemy):
     count = 1
-    person.duration = [False, False, False, False]
+    person.duration = [False, False, False, False, False, False]
     while enemy.hp > 0 and person.hp > 0:
         skill.time_list = \
             [
-                [3, 5], [4, 5], [5, 5], [0, 1]
+                [3, 5], [4, 5], [5, 5], [0, 1], [0, 1], [0, 1]
             ]
         check(person.duration)
         person.battle_info()
