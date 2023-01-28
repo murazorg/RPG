@@ -1,6 +1,6 @@
 import time
 from copy import deepcopy
-#from typing import Dict
+# from typing import Dict
 
 
 class Character:
@@ -29,10 +29,10 @@ class Character:
         self.old_mag_resist = 0  # Не используется
         self.lvl = 1
         self.points = 3
-        self.skills = []
-        self.name_list = [False, False, False, False, False, False]
+        # self.skills = []  # Не используется
+        self.name_list = [False, False, False, False, False, False, False, False, False]
         self.number_skill = 0
-        self.duration = [False, False, False, False, False, False]
+        self.duration = [False, False, False, False, False, False, False, False, False]
 
     def menu(self):
         a = False
@@ -114,7 +114,7 @@ class Character:
 
     def armor_impact(self):
         damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
-        # print('Physical damage reduction: ', damage_reduction, '%', sep='')  #- Сделать активным для проверки формулы брони в бою
+        # print('Physical damage reduction: ', damage_reduction, '%', sep='')  #- Для проверки формулы брони в бою
         return round(damage_reduction, 2)
 
     def change_attribute(self, attribute_name, value):
@@ -273,16 +273,15 @@ class Enemy:
 
 
 class Skill:
-    #name = 'not have'
     def __init__(self):
-        self.skills = \
-    {
-        'stone_skin': self.StoneSkin, 'other_skill_1': 'method_other_skill_1',
-        'other_skill_2': 'method_other_skill_2', 'earth_spike': self.EarthSpike
-    }
+    #     self.skills = \
+    # {
+    #     'stone_skin': self.StoneSkin, 'other_skill_1': 'method_other_skill_1',
+    #     'other_skill_2': 'method_other_skill_2', 'earth_spike': self.EarthSpike
+    # }
         self.time_list = \
             [
-                [3, 5], [4, 5], [5, 5], [0, 1], [0, 1], [0, 1]
+                [3, 5], [4, 5], [5, 5], [0, 1], [0, 1], [0, 1], [None], [None], [None]
             ]
         self.cost = 0
 
@@ -302,39 +301,69 @@ class Skill:
     # pure_list = []
 
     def new(self):
-        print('\nВыберете способность для изучения:')
-        number = 0
-        if person.name_list[0] is False:
-            number += 1
-            print('{0} - Каменная кожа. 1ур'.format(number))
-        if person.name_list[0]:
-            number += 1
-            print('{0} - Каменная кожа. 2ур'.format(number))
-        if person.name_list[1]:
-            number += 1
-            print('{0} - Каменная кожа. 3ур'.format(number))
-        if person.name_list[3] is False:
-            number += 1
-            print('{0} - Земляные шипы. 1ур'.format(number))
-        if person.name_list[3]:
-            number += 1
-            print('{0} - Земляные шипы. 2ур'.format(number))
-        if person.name_list[4]:
-            number += 1
-            print('{0} - Земляные шипы. 3ур'.format(number))
-        choice = input()
-        match choice:
+        print('\nВыберете аспект:')
+        print('1                 Аспект Земли')
+        match input():
             case '1':
-                person.name_list[0] = 'Каменная кожа. 1ур'
-                person.skills.append('stone_skin')
-            case '2':
-                person.name_list[3] = 'Земляные шипы. 1ур'
-                person.skills.append('earth_spike')
+                print('\nВыберете способность для изучения:')
+                false_count = person.name_list[0:3].count(False)
+                match false_count:
+                    case 3:
+                        print('1 - Каменная кожа. 1ур')
+                    case 2:
+                        print('1 - Каменная кожа. 2ур')
+                    case 1:
+                        print('1 - Каменная кожа. 3ур')
+                false_count = person.name_list[3:6].count(False)
+                match false_count:
+                    case 3:
+                        print('2 - Земляные шипы. 1ур')
+                    case 2:
+                        print('2 - Земляные шипы. 2ур')
+                    case 1:
+                        print('2 - Земляные шипы. 3ур')
+                self.choose_skill('earth')
+
+    def choose_skill(self, aspect):
+        choice = input()
+        match aspect:
+            case 'earth':
+                match choice:
+                    case '1':
+                        false_count = person.name_list[0:3].count(False)
+                        match false_count:
+                            case 3:
+                                person.name_list[0] = 'Каменная кожа. 1ур'
+                            case 2:
+                                person.name_list[1] = 'Каменная кожа. 2ур'
+                            case 1:
+                                person.name_list[2] = 'Каменная кожа. 3ур'
+                    case '2':
+                        false_count = person.name_list[3:6].count(False)
+                        match false_count:
+                            case 3:
+                                person.name_list[3] = 'Земляные шипы. 1ур'
+                            case 2:
+                                person.name_list[4] = 'Земляные шипы. 2ур'
+                            case 1:
+                                person.name_list[5] = 'Земляные шипы. 3ур'
 
     def mana_check(self, id_skill):
         match id_skill:
             case 0:
                 self.cost = 20
+                if person.mp >= self.cost:
+                    return True
+                else:
+                    return False
+            case 1:
+                self.cost = 30
+                if person.mp >= self.cost:
+                    return True
+                else:
+                    return False
+            case 2:
+                self.cost = 40
                 if person.mp >= self.cost:
                     return True
                 else:
@@ -345,70 +374,126 @@ class Skill:
                     return True
                 else:
                     return False
+            case 3:
+                self.cost = 30
+                if person.mp >= self.cost:
+                    return True
+                else:
+                    return False
+            case 3:
+                self.cost = 45
+                if person.mp >= self.cost:
+                    return True
+                else:
+                    return False
 
-    def StoneSkin(self):
-        if self.mana_check(0):
-            person.mp -= self.cost
-            person.armor += 4
-            print('Вы покрыли себя камнем и затратили на это {0} маны'.format(self.cost))
-            # a = self.timer_list.get('stone_skin_1')
-            # b = self.timer_list.get('stone_skin_2')
-            # a.update(b)
-            return self.time_list[0]
-        else:
-            print('Не получилось прочесть заклинание')
-            return False
+    def stone_skin(self):
+        false_count = person.name_list[0:3].count(False)
+        match false_count:
+            case 2:
+                if self.mana_check(0):
+                    person.mp -= self.cost
+                    person.armor += 4
+                    print('Вы покрыли себя камнем и затратили на это {0} маны'.format(self.cost))
+                    return self.time_list[0]
+                else:
+                    print('Не получилось прочесть заклинание')
+                    return False
+            case 1:
+                if self.mana_check(1):
+                    person.mp -= self.cost
+                    person.armor += 8
+                    print('Вы покрыли себя камнем и затратили на это {0} маны'.format(self.cost))
+                    return self.time_list[1]
+                else:
+                    print('Не получилось прочесть заклинание')
+                    return False
+            case 0:
+                if self.mana_check(2):
+                    person.mp -= self.cost
+                    person.armor += 12
+                    print('Вы покрыли себя камнем и затратили на это {0} маны'.format(self.cost))
+                    return self.time_list[2]
+                else:
+                    print('Не получилось прочесть заклинание')
+                    return False
 
-    def EarthSpike(self, enemy):
-        if self.mana_check(3):
-            person.mp -= self.cost
-            # old_hp = enemy.hp
-            dmg = enemy.take_mag_attack(25)
-            # dmg = old_hp - enemy.hp
-            print('Земляные пики разверзлись под противником и нанесли ему {1} урона. '
-                  'Вы затратили на это {0} маны'.format(self.cost, dmg))
-            return self.time_list[3]
-        else:
-            print('Не получилось прочесть заклинание')
-            return False
+    def earth_spike(self, enemy):
+        false_count = person.name_list[3:6].count(False)
+        match false_count:
+            case 2:
+                if self.mana_check(3):
+                    person.mp -= self.cost
+                    dmg = enemy.take_mag_attack(25)
+                    print('Земляные пики разверзлись под противником и нанесли ему {1} урона. '
+                          'Вы затратили на это {0} маны'.format(self.cost, dmg))
+                    return self.time_list[3]
+                else:
+                    print('Не получилось прочесть заклинание')
+                    return False
+            case 1:
+                if self.mana_check(4):
+                    person.mp -= self.cost
+                    dmg = enemy.take_mag_attack(40)
+                    print('Земляные пики разверзлись под противником и нанесли ему {1} урона. '
+                          'Вы затратили на это {0} маны'.format(self.cost, dmg))
+                    return self.time_list[4]
+                else:
+                    print('Не получилось прочесть заклинание')
+                    return False
+            case 0:
+                if self.mana_check(5):
+                    person.mp -= self.cost
+                    dmg = enemy.take_mag_attack(55)
+                    print('Земляные пики разверзлись под противником и нанесли ему {1} урона. '
+                          'Вы затратили на это {0} маны'.format(self.cost, dmg))
+                    return self.time_list[5]
+                else:
+                    print('Не получилось прочесть заклинание')
+                    return False
+
+    def dispell(self, user, skill_id):
+        match skill_id:
+            case 0:
+                user.armor -= 4
+            case 1:
+                user.armor -= 8
+            case 2:
+                user.armor -= 12
 
 
-    def UnStoneSkin(self, user):    # Может реализовать систему эффектов? При прохождении таймера запускается скрипт поиска
-                                # эффекта на игроке, который при совпадении  имён способностей запустит нужный скрипт
-                                # развеивания. Либо оставить как есть
-        user.armor -= 4
-        #print("Каменная кожа утратила свою силу")
-
-def skill_id(id):
+def skill_id(skill_id):
     name = 'YOU ARE ABOBA'
-    match id:
-        case 0:
+    match skill_id:
+        case 0 | 1 | 2:
             name = 'Каменная кожа'
-        case 3:
+        case 3 | 4 | 5:
             name = 'Земляные шипы'
     return name
 
+
 def check(timer):
     for i in timer:
-        if i != False:
+        if i:
             i[0] -= 1
             i[1] -= 1
             if i[0] > 0:
                 print('Оставшаяся длительность {0}: {1}'.format(skill_id(timer.index(i)), i[0]))
             elif i[0] == 0:
                 print('Умение {0} перестало действовать'.format(skill_id(timer.index(i))))
-                skill.UnStoneSkin(person)
+                skill.dispell(person, timer.index(i))
             elif i[1] == 0:
                 print('Умение {0} снова доступно'.format(skill_id(timer.index(i))))
                 index = timer.index(i)
                 timer[index] = False
         continue
 
+
 def skill_number():
     for item in person.name_list:
         if item:  # Скилл изучен
             if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
-                if skill.mana_check(person.name_list.index(item)):
+                if skill.mana_check(person.name_list.index(item)):  #  Сделать деление на аспекты, для простоты
                     match person.name_list.index(item):
                         case 0 | 1 | 2:  # stone_skin
                             print('                              1    {0}'.format(item))
@@ -427,21 +512,21 @@ def select_skill(enemy):
     choose = input()
     match choose:
         case '1':
-            person_move = skill.StoneSkin()
+            person_move = skill.stone_skin()
             person.duration[0] = person_move
         case '2':
-            person_move = skill.EarthSpike(enemy)
+            person_move = skill.earth_spike(enemy)
             person.duration[3] = person_move
         case _:
             pass
 
 def battle(enemy):
     count = 1
-    person.duration = [False, False, False, False, False, False]
+    person.duration = [False, False, False, False, False, False, False, False, False]
     while enemy.hp > 0 and person.hp > 0:
         skill.time_list = \
             [
-                [3, 5], [4, 5], [5, 5], [0, 1], [0, 1], [0, 1]
+                [3, 5], [4, 5], [5, 5], [0, 1], [0, 1], [0, 1], [None], [None], [None]
             ]
         check(person.duration)
         person.battle_info()
