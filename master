@@ -1,4 +1,5 @@
-import time
+from time import sleep
+from random import randint
 from copy import deepcopy
 # from typing import Dict
 
@@ -59,7 +60,7 @@ class Character:
                     self.menu()
             case _:
                 print('Неопознанная команда, возвращение в меню...')
-                time.sleep(1)
+                sleep(1)
                 self.menu()
 
     def print_skills(self):
@@ -69,6 +70,10 @@ class Character:
                 a.append(item)
                 break
         for item in reversed(self.name_list[3:6]):
+            if item:
+                a.append(item)
+                break
+        for item in reversed(self.name_list[6:9]):
             if item:
                 a.append(item)
                 break
@@ -166,7 +171,7 @@ class Character:
             print('Вы решили немного покимарить', end='')
             for i in range(5):
                 i += 1
-                time.sleep(1)
+                sleep(1)
                 print('.', end='')
             self.restoration()
             print('\nВы проснулись и чувствуете что хорошо отдохнули')
@@ -210,12 +215,13 @@ class Character:
                 self.lvl_up()
             case _:
                 print('Неопознанная команда, возвращение в меню...')
-                time.sleep(1)
+                sleep(1)
                 self.menu()
         skill.new()
         self.menu()
 
     def take_attack(self, attack):
+        attack -= skill.inertial_damping(attack)  # Attack reduced block
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact, 0)
         return round(impact, 0)
@@ -239,7 +245,7 @@ class Enemy:
                 self.mag_resist = 0.1
             case 'orc':
                 self.hp = 200
-                self.dmg = 15
+                self.dmg = 25
                 self.mp = 20
                 self.armor = 8
                 self.mag_resist = 0.15
@@ -267,6 +273,7 @@ class Enemy:
         return round(damage_reduction, 2)
 
     def take_attack(self, attack):
+        pass  # Attack reduced block
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact, 0)
         return round(impact, 0)
@@ -279,11 +286,6 @@ class Enemy:
 
 class Skill:
     def __init__(self):
-    #     self.skills = \
-    # {
-    #     'stone_skin': self.StoneSkin, 'other_skill_1': 'method_other_skill_1',
-    #     'other_skill_2': 'method_other_skill_2', 'earth_spike': self.EarthSpike
-    # }
         self.time_list = \
             [
                 [3, 5], [4, 5], [5, 5], [0, 1], [0, 1], [0, 1], [None], [None], [None]
@@ -291,7 +293,6 @@ class Skill:
         self.cost = 0
 
     # type = []
-    # base_list = []
     # earth_list = []
     # water_list = []
     # fire_list = []
@@ -307,7 +308,9 @@ class Skill:
 
     def new(self):
         print('\nВыберете аспект:')
-        print('1                 Аспект Земли')
+        false_count = person.name_list[0:10].count(False)
+        if false_count > 0:
+            print('1                 Аспект Земли')
         match input():
             case '1':
                 print('\nВыберете способность для изучения:')
@@ -319,6 +322,8 @@ class Skill:
                         print('1 - Каменная кожа. 2ур')
                     case 1:
                         print('1 - Каменная кожа. 3ур')
+                    case 0:
+                        pass
                 false_count = person.name_list[3:6].count(False)
                 match false_count:
                     case 3:
@@ -327,6 +332,19 @@ class Skill:
                         print('2 - Земляные шипы. 2ур')
                     case 1:
                         print('2 - Земляные шипы. 3ур')
+                    case 0:
+                        pass
+                false_count = person.name_list[6:9].count(False)
+                match false_count:
+                    case 3:
+                        print('3 - Инерционное гашение. 1ур')
+                    case 2:
+                        print('3 - Инерционное гашение. 2ур')
+                    case 1:
+                        print('3 - Инерционное гашение. 3ур')
+                    case 0:
+                        pass
+                print('0 - Назад')
                 self.choose_skill('earth')
 
     def choose_skill(self, aspect):
@@ -343,6 +361,8 @@ class Skill:
                                 person.name_list[1] = 'Каменная кожа. 2ур'
                             case 1:
                                 person.name_list[2] = 'Каменная кожа. 3ур'
+                            case 0:
+                                pass
                     case '2':
                         false_count = person.name_list[3:6].count(False)
                         match false_count:
@@ -352,6 +372,21 @@ class Skill:
                                 person.name_list[4] = 'Земляные шипы. 2ур'
                             case 1:
                                 person.name_list[5] = 'Земляные шипы. 3ур'
+                            case 0:
+                                pass
+                    case '3':
+                        false_count = person.name_list[6:9].count(False)
+                        match false_count:
+                            case 3:
+                                person.name_list[6] = 'Инерционное гашение. 1ур'
+                            case 2:
+                                person.name_list[7] = 'Инерционное гашение. 2ур'
+                            case 1:
+                                person.name_list[8] = 'Инерционное гашение. 3ур'
+                            case 0:
+                                pass
+                    case '0':
+                        self.new()
 
     def mana_check(self, id_skill):
         match id_skill:
@@ -457,6 +492,33 @@ class Skill:
                     print('Не получилось прочесть заклинание')
                     return False
 
+    def inertial_damping(self, attack):
+        block = 0
+        false_count = person.name_list[6:9].count(False)
+        match false_count:
+            case 2:
+                if randint(0, 100) > 50:
+                    block = 8
+                    print('Слои песка заблокировали {0} урона'.format(block))
+            case 1:
+                if randint(0, 100) > 50:
+                    block = 16
+                    if attack > block:
+                        print('Слои песка заблокировали {0} урона'.format(block))
+                    else:
+                        block = attack
+                        print('Слои песка заблокировали все {0} урона'.format(block))
+            case 0:
+                if randint(0, 100) > 50:
+                    block = 24
+                    if attack > block:
+                        print('Слои песка заблокировали {0} урона'.format(block))
+                    else:
+                        block = attack
+                        print('Слои песка заблокировали все {0} урона'.format(block))
+        return block
+
+
     def dispell(self, user, skill_id):
         match skill_id:
             case 0:
@@ -509,6 +571,7 @@ def skill_number():
                 else:
                     print('Недостаточно маны!            2    {0}'.format(item))
                 break
+    print('                              0    Назад')
 
 
 def select_skill(enemy):
@@ -518,9 +581,13 @@ def select_skill(enemy):
         case '1':
             person_move = skill.stone_skin()
             person.duration[0] = person_move
+            return True
         case '2':
             person_move = skill.earth_spike(enemy)
             person.duration[3] = person_move
+            return True
+        case '0':
+            pass
         case _:
             pass
 
@@ -535,18 +602,23 @@ def battle(enemy):
         check(person.duration)
         person.battle_info()
         enemy.battle_info()
-        print('\nХод {0} как вы поступите?'.format(count))
-        print('                              1    Атаковать')
-        print('                              2    Использовать способность')
-        choose = input()
-        match choose:
-            case '1':
-                person_move = enemy.take_attack(person.dmg)
-                print(enemy.name, 'получил', person_move, 'урона')
-            case '2':
-                select_skill(enemy)
-            case _:
-                continue
+        while True:
+            print('\nХод {0} как вы поступите?'.format(count))
+            print('                              1    Атаковать')
+            print('                              2    Использовать способность')
+            choose = input()
+            match choose:
+                case '1':
+                    person_move = enemy.take_attack(person.dmg)
+                    print(enemy.name, 'получил', person_move, 'урона')
+                    break
+                case '2':
+                    if select_skill(enemy):
+                        break
+                    else:
+                        continue
+                case _:
+                    continue
         b = person.take_attack(enemy.dmg)
         print('Вы получили', b, 'урона')
         count += 1
@@ -557,7 +629,7 @@ def battle(enemy):
         print('\nВы победили!\n')
     else:
         print('\nВы проиграли, игра окончена...')
-        time.sleep(5)
+        sleep(5)
         exit()
 
 def scenario_1():
