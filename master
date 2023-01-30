@@ -742,11 +742,12 @@ def battle(enemy):
                     continue
         enemy_effects(enemy)
         if enemy.hp <= 0:
-            if 'Каменная кожа. 1ур' or 'Каменная кожа. 2ур' or 'Каменная кожа. 3ур' in person.effects:
-                for item in reversed(person.name_list[0:3]):
-                    if item:
-                        skill.disspell(person, enemy, person.name_list.index(item))
-                        break
+            if 'Каменная кожа. 1ур' in person.effects:
+                skill.disspell(person, enemy, 0)
+            if 'Каменная кожа. 2ур' in person.effects:
+                skill.disspell(person, enemy, 1)
+            if 'Каменная кожа. 3ур' in person.effects:
+                skill.disspell(person, enemy, 2)
             print('\nВы победили!\n')
             continue
         dmg = person.take_attack(enemy, enemy.dmg)
