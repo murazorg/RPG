@@ -734,7 +734,8 @@ def battle(enemy):
         while True:
             print('\nХод {0} как вы поступите?'.format(count))
             print('                              1    Атаковать')
-            print('                              2    Использовать способность')
+            if person.name_list.count(False) < len(person.name_list):
+                print('                              2    Использовать способность')
             choose = input()
             match choose:
                 case '1':
