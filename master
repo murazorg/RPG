@@ -29,11 +29,11 @@ class Character:
         self.mag_resist = 0.1
         self.old_mag_resist = 0  # Не используется
         self.lvl = 1
-        self.points = 3
+        self.points = 4
         # self.skills = []  # Не используется
-        self.name_list = [False, False, False, False, False, False, False, False, False]
+        self.name_list = [False, False, False, False, False, False, False, False, False, False]
         self.number_skill = 0
-        self.duration = [False, False, False, False, False, False, False, False, False]
+        self.duration = [False, False, False, False, False, False, False, False, False, False]
 
     def menu(self):
         a = False
@@ -77,6 +77,8 @@ class Character:
             if item:
                 a.append(item)
                 break
+        if self.name_list[9]:
+            a.append(self.name_list[9])
         return a
 
     def all_info(self):
@@ -104,24 +106,6 @@ class Character:
         print('Броня:                       ', self.armor)
         print('Эффективность Брони:         ', self.armor_impact() * 100, '%')
 
-    # def strength_bonus(self):
-    #     if self.old_strength < self.strength:
-    #         a = self.strength - self.old_strength
-    #         self.max_hp += 10 * a
-    #         self.mag_resist += 0.001 * a
-    #         self.old_strength = self.strength
-
-    # def agility_bonus(self):
-    #     if self.old_agility < self.agility:
-    #         a = self.agility - self.old_agility
-    #         self.dmg += 1 * a
-    #         self.armor += 0.25 * a
-    #         self.old_agility = self.agility
-
-    # def intellect_bonus(self):
-    #     self.max_mp += 5 * self.intellect
-    #     self.amp_mag_dmg += 0.5 * self.intellect
-
     def armor_impact(self):
         damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
         # print('Physical damage reduction: ', damage_reduction, '%', sep='')  #- Для проверки формулы брони в бою
@@ -135,19 +119,16 @@ class Character:
                 if self.hp > self.max_hp:
                     self.hp = self.max_hp
                 self.mag_resist += round((0.001 * value), 3)
-                # self.strength_bonus()
             case 'agility':
                 self.agility += value
                 self.dmg += 1 * value
                 self.armor += 0.25 * value
-                # self.agility_bonus()
             case 'intellect':
                 self.intellect += value
                 self.max_mp += 5 * value
                 if self.mp > self.max_mp:
                     self.mp = self.max_mp
                 self.amp_mag_dmg += 0.5 * value
-                # self.intellect_bonus()
 
     def calculate_max_hp(self):
         self.max_hp = 100
@@ -209,8 +190,7 @@ class Character:
                 print('Cила увеличивает живучесть и устойчивость к магии')
                 print('Ловкость оттачивает ваши атаки и смягчает получаемые удары')
                 print('Интеллект увеличивает запас маны и силу заклинаний')
-                print()
-                print('Введите что-нибудь для продолжения...')
+                print('\nВведите что-нибудь для продолжения...')
                 input()
                 self.lvl_up()
             case _:
@@ -288,7 +268,7 @@ class Skill:
     def __init__(self):
         self.time_list = \
             [
-                [3, 5], [4, 5], [5, 5], [0, 1], [0, 1], [0, 1], [None], [None], [None]
+                [3, 5], [4, 5], [5, 5], [0, 1], [0, 1], [0, 1], [None], [None], [None], [3, 6]
             ]
         self.cost = 0
 
@@ -344,6 +324,9 @@ class Skill:
                         print('3 - Инерционное гашение. 3ур')
                     case 0:
                         pass
+                if (person.name_list[2] or person.name_list[5] or person.name_list[8]) and (person.name_list[9] is False):
+                    print('4 - Гипоцентр')
+                print('5 - ИНФО')
                 print('0 - Назад')
                 self.choose_skill('earth')
 
@@ -385,6 +368,29 @@ class Skill:
                                 person.name_list[8] = 'Инерционное гашение. 3ур'
                             case 0:
                                 pass
+                    case '4':
+                        false_count = person.name_list[9:10].count(False)
+                        match false_count:
+                            case 1:
+                                person.name_list[9] = 'Гипоцентр'
+                            case 0:
+                                pass
+                    case '5':
+                        print('\nКаменная кожа - одно из самых известных заклинаний, покрывающее вашу плоть камнем. '
+                              '\nПрекрасно подходит как для слабозащищенных магов, так и для крепких воинов')
+                        print('\nЗемляные шипы - девиант философии данного аспекта. Создает шипы прямо под противником '
+                              'и пронзает его ими. \nБыстропроизносимое и не требующее особого мастерства. '
+                              'Несмотря на свою простоту может стать хорошим подспорьем в схватке')
+                        print('\nИнерционное гашение - древнее зачарование, призванное поглотить вражеские удары '
+                              'многослойными песчаными структурами. \nНе требует маны для поддержания и '
+                              'существует до тех пор, пока жив сам зачарователь')
+                        if person.name_list[2] or person.name_list[5] or person.name_list[8]:
+                            print('\nГипоцентр - Один из сильнейших представителей аспекта, воплощающее суть Земли.\n'
+                                  'Приводя в движение земные породы, вы буквально выбиваете землю из под ног противника'
+                                  ', отчего они начинают промахиваться и терпят урон')
+                        print('\nВведите что-нибудь для возврата...')
+                        input()
+                        self.new()
                     case '0':
                         self.new()
 
@@ -422,6 +428,12 @@ class Skill:
                     return False
             case 5:
                 self.cost = 45
+                if person.mp >= self.cost:
+                    return True
+                else:
+                    return False
+            case 9:
+                self.cost = 120
                 if person.mp >= self.cost:
                     return True
                 else:
@@ -593,11 +605,11 @@ def select_skill(enemy):
 
 def battle(enemy):
     count = 1
-    person.duration = [False, False, False, False, False, False, False, False, False]
+    person.duration = [False, False, False, False, False, False, False, False, False, False]
     while enemy.hp > 0 and person.hp > 0:
         skill.time_list = \
             [
-                [3, 5], [4, 5], [5, 5], [0, 1], [0, 1], [0, 1], [None], [None], [None]
+                [4, 6], [5, 6], [6, 6], [0, 1], [0, 1], [0, 1], [None], [None], [None], [3, 6]
             ]
         check(person.duration)
         person.battle_info()
