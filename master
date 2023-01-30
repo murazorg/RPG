@@ -29,10 +29,10 @@ class Character:
         self.mag_resist = 0.1
         self.old_mag_resist = 0  # Не используется
         self.lvl = 1
-        self.points = 4
+        self.points = 5
         # self.skills = []  # Не используется
         self.name_list = [False, False, False, False, False, False, False, False, False, False]
-        self.number_skill = 0
+        self.effects = {}
         self.duration = [False, False, False, False, False, False, False, False, False, False]
 
     def menu(self):
@@ -104,7 +104,7 @@ class Character:
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
-        print('Эффективность Брони:         ', self.armor_impact() * 100, '%')
+        print('Эффективность Брони:         ', self.armor_impact() * 100, '%\n')
 
     def armor_impact(self):
         damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
@@ -131,12 +131,12 @@ class Character:
                 self.amp_mag_dmg += 0.5 * value
 
     def calculate_max_hp(self):
-        self.max_hp = 100
+        self.max_hp = 1000
         self.max_hp += self.strength * 10
         return self.max_hp
 
     def calculate_max_mp(self):
-        self.max_mp = 50
+        self.max_mp = 5000
         self.max_mp += self.intellect * 5
         return self.max_mp
 
@@ -200,7 +200,10 @@ class Character:
         skill.new()
         self.menu()
 
-    def take_attack(self, attack):
+    def take_attack(self, enemy, attack):
+        if 'Ипоцентр' in enemy.effects:
+            if randint(0, 100) <= 25:
+                return False
         attack -= skill.inertial_damping(attack)  # Attack reduced block
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact, 0)
@@ -213,17 +216,19 @@ class Enemy:
     mp = 0
     armor = 0
     mag_resist = 0
+    effects = {}
 
     def __init__(self, name):
         self.name = name
         match self.name:
-            case 'goblin':
+            case 'Гоблин':
                 self.hp = 250
                 self.dmg = 10
                 self.mp = 0
                 self.armor = 2
                 self.mag_resist = 0.1
-            case 'orc':
+                self.effects = {}
+            case 'Орк':
                 self.hp = 200
                 self.dmg = 25
                 self.mp = 20
@@ -231,9 +236,7 @@ class Enemy:
                 self.mag_resist = 0.15
 
     def all_info(self):
-        match self.name:
-            case 'goblin':
-                print('Гоблин:')
+        print(self.name)
         print('Здоровье:                    ', self.hp)
         print('Урон:                        ', self.dmg)
         print('Мана:                        ', self.mp)
@@ -241,9 +244,7 @@ class Enemy:
         print('Сопротивление магии:         ', self.mag_resist * 100, '%')
 
     def battle_info(self):
-        match self.name:
-            case 'goblin':
-                print('\nГоблин:')
+        print(self.name)
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
@@ -445,6 +446,7 @@ class Skill:
             case 2:
                 if self.mana_check(0):
                     person.mp -= self.cost
+                    person.effects['Каменная кожа. 1ур'] = True
                     person.armor += 4
                     print('Вы покрыли себя камнем и затратили на это {0} маны'.format(self.cost))
                     return self.time_list[0]
@@ -454,6 +456,7 @@ class Skill:
             case 1:
                 if self.mana_check(1):
                     person.mp -= self.cost
+                    person.effects['Каменная кожа. 2ур'] = True
                     person.armor += 8
                     print('Вы покрыли себя камнем и затратили на это {0} маны'.format(self.cost))
                     return self.time_list[1]
@@ -463,6 +466,7 @@ class Skill:
             case 0:
                 if self.mana_check(2):
                     person.mp -= self.cost
+                    person.effects['Каменная кожа. 3ур'] = True
                     person.armor += 12
                     print('Вы покрыли себя камнем и затратили на это {0} маны'.format(self.cost))
                     return self.time_list[2]
@@ -534,24 +538,27 @@ class Skill:
         if person.name_list[9]:
             if self.mana_check(9):
                 person.mp -= self.cost
-                dmg = enemy.take_mag_attack(50)
-                if randint(0, 100) >= 25:  # miss system
-                    pass  # system effects?
-                print('XXX {1} урона. '
-                      'Вы затратили на это {0} маны'.format(self.cost, dmg))
+                enemy.effects['Ипоцентр'] = True
+                print('Земля вокруг задрожала и противник начал терять равновесие. '
+                      'Вы затратили на это {0} маны'.format(self.cost))
                 return self.time_list[9]
             else:
                 print('Не получилось прочесть заклинание')
                 return False
 
-    def dispell(self, user, skill_id):
+    def dispell(self, person, enemy, skill_id):
         match skill_id:
             case 0:
-                user.armor -= 4
+                del person.effects['Каменная кожа. 1ур']
+                person.armor -= 4
             case 1:
-                user.armor -= 8
+                del person.effects['Каменная кожа. 2ур']
+                person.armor -= 8
             case 2:
-                user.armor -= 12
+                del person.effects['Каменная кожа. 3ур']
+                person.armor -= 12
+            case 9:
+                del enemy.effects['Ипоцентр']
 
 
 def skill_id(skill_id):
@@ -566,7 +573,7 @@ def skill_id(skill_id):
     return name
 
 
-def check(timer):
+def check(timer, enemy):
     for i in timer:
         if i:
             i[0] -= 1
@@ -575,7 +582,7 @@ def check(timer):
                 print('Оставшаяся длительность {0}: {1}'.format(skill_id(timer.index(i)), i[0]))
             elif i[0] == 0:
                 print('Умение {0} перестало действовать'.format(skill_id(timer.index(i))))
-                skill.dispell(person, timer.index(i))
+                skill.dispell(person, enemy, timer.index(i))
             elif i[1] == 0:
                 print('Умение {0} снова доступно'.format(skill_id(timer.index(i))))
                 index = timer.index(i)
@@ -600,6 +607,14 @@ def skill_number():
                 else:
                     print('Недостаточно маны!            2    {0}'.format(item))
                 break
+    for item in reversed(person.name_list[9:10]):
+        if item:  # Скилл изучен
+            if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
+                if skill.mana_check(person.name_list.index(item)):
+                    print('                              4    {0}'.format(item))
+                else:
+                    print('Недостаточно маны!            4    {0}'.format(item))
+                break
     print('                              0    Назад')
 
 
@@ -615,20 +630,31 @@ def select_skill(enemy):
             person_move = skill.earth_spike(enemy)
             person.duration[3] = person_move
             return True
+        case '4':
+            person_move = skill.ipocent(enemy)
+            person.duration[9] = person_move
+            return True
         case '0':
             pass
         case _:
             pass
 
+def enemy_effects(enemy):
+    if 'Ипоцентр' in enemy.effects:
+        dmg = enemy.take_mag_attack(50)
+        print('Ипоцентр нанёс {0} урона'.format(dmg))
+
+
 def battle(enemy):
     count = 1
     person.duration = [False, False, False, False, False, False, False, False, False, False]
+    pass
     while enemy.hp > 0 and person.hp > 0:
         skill.time_list = \
             [
                 [4, 6], [5, 6], [6, 6], [0, 1], [0, 1], [0, 1], [None], [None], [None], [3, 6]
             ]
-        check(person.duration)
+        check(person.duration, enemy)
         person.battle_info()
         enemy.battle_info()
         while True:
@@ -648,15 +674,25 @@ def battle(enemy):
                         continue
                 case _:
                     continue
-        b = person.take_attack(enemy.dmg)
-        print('Вы получили', b, 'урона')
+        enemy_effects(enemy)
+        if enemy.hp <= 0:
+            for item in reversed(person.name_list[0:3]):
+                if item:
+                    skill.dispell(person, enemy, person.name_list.index(item))
+                    print(person.effects)
+                    break
+            print('\nВы победили!\n')
+            continue
+        dmg = person.take_attack(enemy, enemy.dmg)
+        if dmg:
+            print('Вы получили {0} урона'.format(dmg))
+        elif dmg is False:
+            print('Противник промахнулся')
         count += 1
         if len(person.duration) > 0:  # Для откладки duration
             print(person.duration)
             print(skill.time_list)
-    if enemy.hp < 0:
-        print('\nВы победили!\n')
-    else:
+    if person.hp <= 0:
         print('\nВы проиграли, игра окончена...')
         sleep(5)
         exit()
@@ -664,13 +700,13 @@ def battle(enemy):
 def scenario_1():
     print('')
     # Здесь должна быть функция случайного слабого врага. Пока просто гоблин
-    enemy = Enemy('goblin')
+    enemy = Enemy('Гоблин')
     print('Вы встретили Гоблина', )
     enemy.all_info()
     battle(enemy)
     # Здесь должна быть динамическая функция награды за противника
     print('Вы встретили Гоблина', )
-    enemy = Enemy('goblin')
+    enemy = Enemy('Гоблин')
     enemy.all_info()
     battle(enemy)
     print('После небольшого путешествия вы возвращаетесь домой')
