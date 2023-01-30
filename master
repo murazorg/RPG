@@ -203,6 +203,10 @@ class Character:
         if 'Ипоцентр' in enemy.effects:
             if randint(0, 100) <= 25:
                 return False
+        if 'Гнев орка' in enemy.effects:
+            if randint(0, 100) <= 20:
+                attack = attack * 1.5
+                print(enemy.name, 'совершил критическую атаку!')
         attack -= skill.inertial_damping(attack)  # Attack reduced block
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact, 0)
@@ -221,18 +225,34 @@ class Enemy:
         self.name = name
         match self.name:
             case 'Гоблин':
-                self.hp = 250
-                self.dmg = 10
+                self.hp = 70
+                self.dmg = 8
                 self.mp = 0
                 self.armor = 2
                 self.mag_resist = 0.1
                 self.effects = {}
             case 'Орк':
-                self.hp = 200
-                self.dmg = 25
-                self.mp = 20
+                self.hp = 150
+                self.dmg = 14
+                self.mp = 0
                 self.armor = 8
                 self.mag_resist = 0.15
+                self.effects = {'Гнев орка': True}
+            case 'Огр':
+                self.hp = 230
+                self.max_hp = 230
+                self.dmg = 33
+                self.mp = 80
+                self.armor = 8
+                self.mag_resist = 0.15
+                self.effects = {'Регенерация': False}
+            case 'Циклоп':
+                self.hp = 460
+                self.dmg = 56
+                self.mp = 0
+                self.armor = 14
+                self.mag_resist = 0.3
+                self.effects = {'Ярость': False, 'Крепкая кожа': True}
 
     def all_info(self):
         print(self.name)
@@ -253,14 +273,59 @@ class Enemy:
         return round(damage_reduction, 2)
 
     def take_attack(self, attack):
-        pass  # Attack reduced block
+        if 'Крепкая кожа' in enemy.effects:
+            attack - 10
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact, 0)
+        if self.hp > 0:
+            if 'Ярость' in enemy.effects:
+                if enemy.effects['Ярость'] is False:
+                    if self.hp <= 160:
+                        enemy.effects['Ярость'] = True
+                        print(enemy.name, 'вошёл в состояние ярости')
+                        self.mag_resist += 0.2
+                        self.dmg += 14
+            if 'Регенерация' in enemy.effects:
+                if enemy.effects['Регенерация'] is False:
+                    percent = self.hp / self.max_hp
+                    if 0.9 <= percent < 1:
+                        self.hp += self.max_hp * 0.02
+                    if 0.7 <= percent < 0.9:
+                        self.hp += self.max_hp * 0.04
+                    if 0.5 <= percent < 0.7:
+                        self.hp += self.max_hp * 0.06
+                    if 0.3 <= percent < 0.5:
+                        self.hp += self.max_hp * 0.08
+                    if percent < 0.3:
+                        self.hp += self.max_hp * 0.1
+                    enemy.effects['Регенерация'] = True
         return round(impact, 0)
 
     def take_mag_attack(self, mag_attack: int):
         impact = (mag_attack * (1 + (person.amp_mag_dmg / 100))) * (1 - self.mag_resist)
         self.hp -= round(impact, 0)
+        if self.hp > 0:
+            if 'Ярость' in enemy.effects:
+                if enemy.effects['Ярость'] is False:
+                    if self.hp <= 160:
+                        enemy.effects['Ярость'] = True
+                        print(enemy.name, 'вошёл в состояние ярости')
+                        self.mag_resist += 0.2
+                        self.dmg += 14
+            if 'Регенерация' in enemy.effects:
+                if enemy.effects['Регенерация'] is False:
+                    percent = self.hp / self.max_hp
+                    if 0.9 <= percent < 1:
+                        self.hp += self.max_hp * 0.02
+                    if 0.7 <= percent < 0.9:
+                        self.hp += self.max_hp * 0.04
+                    if 0.5 <= percent < 0.7:
+                        self.hp += self.max_hp * 0.06
+                    if 0.3 <= percent < 0.5:
+                        self.hp += self.max_hp * 0.08
+                    if percent < 0.3:
+                        self.hp += self.max_hp * 0.1
+                    enemy.effects['Регенерация'] = True
         return round(impact, 0)
 
 
@@ -677,12 +742,11 @@ def battle(enemy):
                     continue
         enemy_effects(enemy)
         if enemy.hp <= 0:
-            print(person.effects)
-            for item in reversed(person.name_list[0:3]):
-                if item:
-                    skill.disspell(person, enemy, person.name_list.index(item))
-                    print(person.effects)
-                    break
+            if 'Каменная кожа. 1ур' or 'Каменная кожа. 2ур' or 'Каменная кожа. 3ур' in person.effects:
+                for item in reversed(person.name_list[0:3]):
+                    if item:
+                        skill.disspell(person, enemy, person.name_list.index(item))
+                        break
             print('\nВы победили!\n')
             continue
         dmg = person.take_attack(enemy, enemy.dmg)
