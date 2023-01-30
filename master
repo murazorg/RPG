@@ -509,11 +509,11 @@ class Skill:
         false_count = person.name_list[6:9].count(False)
         match false_count:
             case 2:
-                if randint(0, 100) > 50:
+                if randint(0, 100) >= 50:
                     block = 8
                     print('Слои песка заблокировали {0} урона'.format(block))
             case 1:
-                if randint(0, 100) > 50:
+                if randint(0, 100) >= 50:
                     block = 16
                     if attack > block:
                         print('Слои песка заблокировали {0} урона'.format(block))
@@ -521,7 +521,7 @@ class Skill:
                         block = attack
                         print('Слои песка заблокировали все {0} урона'.format(block))
             case 0:
-                if randint(0, 100) > 50:
+                if randint(0, 100) >= 50:
                     block = 24
                     if attack > block:
                         print('Слои песка заблокировали {0} урона'.format(block))
@@ -530,6 +530,19 @@ class Skill:
                         print('Слои песка заблокировали все {0} урона'.format(block))
         return block
 
+    def ipocent(self, enemy):
+        if person.name_list[9]:
+            if self.mana_check(9):
+                person.mp -= self.cost
+                dmg = enemy.take_mag_attack(50)
+                if randint(0, 100) >= 25:  # miss system
+                    pass  # system effects?
+                print('XXX {1} урона. '
+                      'Вы затратили на это {0} маны'.format(self.cost, dmg))
+                return self.time_list[9]
+            else:
+                print('Не получилось прочесть заклинание')
+                return False
 
     def dispell(self, user, skill_id):
         match skill_id:
@@ -546,6 +559,10 @@ def skill_id(skill_id):
     match skill_id:
         case 0 | 1 | 2:
             name = 'Каменная кожа'
+        case 3 | 4 | 5:
+            name = 'Земляные шипы'
+        case 9:
+            name = 'Гипоцентр'
     return name
 
 
