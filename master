@@ -676,6 +676,7 @@ def battle(enemy):
                     continue
         enemy_effects(enemy)
         if enemy.hp <= 0:
+            print(person.effects)
             for item in reversed(person.name_list[0:3]):
                 if item:
                     skill.dispell(person, enemy, person.name_list.index(item))
