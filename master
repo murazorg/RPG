@@ -268,7 +268,7 @@ class Skill:
     def __init__(self):
         self.time_list = \
             [
-                [3, 5], [4, 5], [5, 5], [0, 1], [0, 1], [0, 1], [None], [None], [None], [3, 6]
+                [3, 5], [4, 5], [5, 5], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6]
             ]
         self.cost = 0
 
@@ -639,6 +639,7 @@ def select_skill(enemy):
         case _:
             pass
 
+
 def enemy_effects(enemy):
     if 'Ипоцентр' in enemy.effects:
         dmg = enemy.take_mag_attack(50)
@@ -652,7 +653,7 @@ def battle(enemy):
     while enemy.hp > 0 and person.hp > 0:
         skill.time_list = \
             [
-                [4, 6], [5, 6], [6, 6], [0, 1], [0, 1], [0, 1], [None], [None], [None], [3, 6]
+                [4, 6], [5, 6], [6, 6], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6]
             ]
         check(person.duration, enemy)
         person.battle_info()
@@ -697,6 +698,7 @@ def battle(enemy):
         print('\nВы проиграли, игра окончена...')
         sleep(5)
         exit()
+
 
 def scenario_1():
     print('')
