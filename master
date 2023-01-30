@@ -17,7 +17,7 @@ class Character:
         self.hp = 100
         self.max_hp = 100
         self.old_hp = 100  # Не используется
-        self.dmg = 10
+        self.dmg = 40
         self.old_dmg = 10  # Не используется
         self.mp = 50
         self.max_mp = 50
@@ -131,7 +131,7 @@ class Character:
                 self.amp_mag_dmg += 0.5 * value
 
     def calculate_max_hp(self):
-        self.max_hp = 1000
+        self.max_hp = 10000
         self.max_hp += self.strength * 10
         return self.max_hp
 
@@ -267,26 +267,28 @@ class Enemy:
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
+        print('Эффекты:                     ', self.effects)
 
     def armor_impact(self):
         damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
         return round(damage_reduction, 2)
 
     def take_attack(self, attack):
-        if 'Крепкая кожа' in enemy.effects:
+        if 'Крепкая кожа' in self.effects:
             attack - 10
+            print('Крепкая кожа выдержала часть урона')
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact, 0)
         if self.hp > 0:
-            if 'Ярость' in enemy.effects:
-                if enemy.effects['Ярость'] is False:
+            if 'Ярость' in self.effects:
+                if self.effects['Ярость'] is False:
                     if self.hp <= 160:
-                        enemy.effects['Ярость'] = True
-                        print(enemy.name, 'вошёл в состояние ярости')
+                        self.effects['Ярость'] = True
+                        print(self.name, 'вошёл в состояние ярости')
                         self.mag_resist += 0.2
                         self.dmg += 14
-            if 'Регенерация' in enemy.effects:
-                if enemy.effects['Регенерация'] is False:
+            if 'Регенерация' in self.effects:
+                if self.effects['Регенерация'] is False:
                     percent = self.hp / self.max_hp
                     if 0.9 <= percent < 1:
                         self.hp += self.max_hp * 0.02
@@ -298,22 +300,24 @@ class Enemy:
                         self.hp += self.max_hp * 0.08
                     if percent < 0.3:
                         self.hp += self.max_hp * 0.1
-                    enemy.effects['Регенерация'] = True
+                    self.hp = round(self.hp)
+                    print(self.name, 'восстановил часть здоровья')
+                    self.effects['Регенерация'] = True
         return round(impact, 0)
 
     def take_mag_attack(self, mag_attack: int):
         impact = (mag_attack * (1 + (person.amp_mag_dmg / 100))) * (1 - self.mag_resist)
         self.hp -= round(impact, 0)
         if self.hp > 0:
-            if 'Ярость' in enemy.effects:
-                if enemy.effects['Ярость'] is False:
+            if 'Ярость' in self.effects:
+                if self.effects['Ярость'] is False:
                     if self.hp <= 160:
-                        enemy.effects['Ярость'] = True
-                        print(enemy.name, 'вошёл в состояние ярости')
+                        self.effects['Ярость'] = True
+                        print(self.name, 'вошёл в состояние ярости')
                         self.mag_resist += 0.2
                         self.dmg += 14
-            if 'Регенерация' in enemy.effects:
-                if enemy.effects['Регенерация'] is False:
+            if 'Регенерация' in self.effects:
+                if self.effects['Регенерация'] is False:
                     percent = self.hp / self.max_hp
                     if 0.9 <= percent < 1:
                         self.hp += self.max_hp * 0.02
@@ -325,7 +329,9 @@ class Enemy:
                         self.hp += self.max_hp * 0.08
                     if percent < 0.3:
                         self.hp += self.max_hp * 0.1
-                    enemy.effects['Регенерация'] = True
+                    self.hp = round(self.hp)
+                    print(self.name, 'восстановил часть здоровья')
+                    self.effects['Регенерация'] = True
         return round(impact, 0)
 
 
@@ -709,6 +715,8 @@ def enemy_effects(enemy):
     if 'Ипоцентр' in enemy.effects:
         dmg = enemy.take_mag_attack(50)
         print('Ипоцентр нанёс {0} урона'.format(dmg))
+    if 'Регенерация' in enemy.effects:
+        enemy.effects['Регенерация'] = False
 
 
 def battle(enemy):
@@ -773,8 +781,16 @@ def scenario_1():
     enemy.all_info()
     battle(enemy)
     # Здесь должна быть динамическая функция награды за противника
-    print('Вы встретили Гоблина', )
-    enemy = Enemy('Гоблин')
+    print('Вы встретили Орка', )
+    enemy = Enemy('Орк')
+    enemy.all_info()
+    battle(enemy)
+    print('Вы встретили Огра', )
+    enemy = Enemy('Огр')
+    enemy.all_info()
+    battle(enemy)
+    print('Вы встретили Циклопа', )
+    enemy = Enemy('Циклоп')
     enemy.all_info()
     battle(enemy)
     print('После небольшого путешествия вы возвращаетесь домой')
