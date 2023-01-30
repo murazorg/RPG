@@ -158,7 +158,6 @@ class Character:
             print('\nВы проснулись и чувствуете что хорошо отдохнули')
             self.menu()
 
-
     def lvl_up(self):
         increase = 5
         print('Какой атрибут вы желаете увеличить на {0} единиц?'.format(increase))
@@ -325,7 +324,8 @@ class Skill:
                         print('3 - Инерционное гашение. 3ур')
                     case 0:
                         pass
-                if (person.name_list[2] or person.name_list[5] or person.name_list[8]) and (person.name_list[9] is False):
+                if (person.name_list[2] or person.name_list[5] or person.name_list[8]) and\
+                        (person.name_list[9] is False):
                     print('4 - Гипоцентр')
                 print('5 - ИНФО')
                 print('0 - Назад')
@@ -546,7 +546,7 @@ class Skill:
                 print('Не получилось прочесть заклинание')
                 return False
 
-    def dispell(self, person, enemy, skill_id):
+    def disspell(self, person, enemy, skill_id):
         match skill_id:
             case 0:
                 del person.effects['Каменная кожа. 1ур']
@@ -582,7 +582,7 @@ def check(timer, enemy):
                 print('Оставшаяся длительность {0}: {1}'.format(skill_id(timer.index(i)), i[0]))
             elif i[0] == 0:
                 print('Умение {0} перестало действовать'.format(skill_id(timer.index(i))))
-                skill.dispell(person, enemy, timer.index(i))
+                skill.disspell(person, enemy, timer.index(i))
             elif i[1] == 0:
                 print('Умение {0} снова доступно'.format(skill_id(timer.index(i))))
                 index = timer.index(i)
@@ -679,7 +679,7 @@ def battle(enemy):
             print(person.effects)
             for item in reversed(person.name_list[0:3]):
                 if item:
-                    skill.dispell(person, enemy, person.name_list.index(item))
+                    skill.disspell(person, enemy, person.name_list.index(item))
                     print(person.effects)
                     break
             print('\nВы победили!\n')
