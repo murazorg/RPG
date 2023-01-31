@@ -1,7 +1,5 @@
 from time import sleep
 from random import randint
-from copy import deepcopy
-# from typing import Dict
 
 
 class Character:
@@ -266,7 +264,7 @@ class Enemy:
                 self.mp = 80
                 self.armor = 8
                 self.mag_resist = 0.15
-                self.effects = {'Регенерация': False}
+                self.effects = {'Регенерация': True}
             case 'Циклоп':
                 self.hp = 460
                 self.dmg = 56
@@ -274,6 +272,14 @@ class Enemy:
                 self.armor = 14
                 self.mag_resist = 0.3
                 self.effects = {'Ярость': False, 'Крепкая кожа': True}
+            case 'Малый энт':
+                self.hp = 90
+                self.max_hp = 90
+                self.dmg = 6
+                self.mp = 0
+                self.armor = 3
+                self.mag_resist = 0.1
+                self.effects = {'Заживление': True}
 
     def print_effects(self):
         a = []
@@ -316,7 +322,7 @@ class Enemy:
                         self.mag_resist += 0.2
                         self.dmg += 14
             if 'Регенерация' in self.effects:
-                if self.effects['Регенерация'] is False:
+                if self.effects['Регенерация']:
                     percent = self.hp / self.max_hp
                     if 0.9 <= percent < 1:
                         self.hp += self.max_hp * 0.02
@@ -330,7 +336,13 @@ class Enemy:
                         self.hp += self.max_hp * 0.1
                     self.hp = round(self.hp)
                     print(self.name, 'восстановил часть здоровья')
-                    self.effects['Регенерация'] = True
+                    self.effects['Регенерация'] = False
+            if 'Заживление' in self.effects:
+                if self.effects['Заживление']:
+                    if self.hp < self.max_hp:
+                        self.hp += 5
+                        print(self.name, 'восстановил часть здоровья')
+                        self.effects['Заживление'] = False
         return round(impact, 0)
 
     def take_mag_attack(self, mag_attack: int):
@@ -345,7 +357,7 @@ class Enemy:
                         self.mag_resist += 0.2
                         self.dmg += 14
             if 'Регенерация' in self.effects:
-                if self.effects['Регенерация'] is False:
+                if self.effects['Регенерация']:
                     percent = self.hp / self.max_hp
                     if 0.9 <= percent < 1:
                         self.hp += self.max_hp * 0.02
@@ -359,7 +371,13 @@ class Enemy:
                         self.hp += self.max_hp * 0.1
                     self.hp = round(self.hp)
                     print(self.name, 'восстановил часть здоровья')
-                    self.effects['Регенерация'] = True
+                    self.effects['Регенерация'] = False
+                if 'Заживление' in self.effects:
+                    if self.effects['Заживление']:
+                        if self.hp < self.max_hp:
+                            self.hp += 5
+                            print(self.name, 'восстановил часть здоровья')
+                            self.effects['Заживление'] = False
         return round(impact, 0)
 
 
@@ -924,7 +942,9 @@ def enemy_effects(enemy):
         dmg = enemy.take_mag_attack(50)
         print('Ипоцентр нанёс {0} урона'.format(dmg))
     if 'Регенерация' in enemy.effects:
-        enemy.effects['Регенерация'] = False
+        enemy.effects['Регенерация'] = True
+    if 'Заживление' in enemy.effects:
+        enemy.effects['Заживление'] = True
 
 
 def battle(enemy):
@@ -1002,20 +1022,24 @@ def battle(enemy):
 def scenario_1():
     print('')
     # Здесь должна быть функция случайного слабого врага. Пока просто гоблин
+    print('Вы встретили Гоблина')
     enemy = Enemy('Гоблин')
-    print('Вы встретили Гоблина', )
     enemy.all_info()
     battle(enemy)
     # Здесь должна быть динамическая функция награды за противника
-    print('Вы встретили Орка', )
+    print('Вы встретили Малого энта')
+    enemy = Enemy('Малый энт')
+    enemy.all_info()
+    battle(enemy)
+    print('Вы встретили Орка')
     enemy = Enemy('Орк')
     enemy.all_info()
     battle(enemy)
-    print('Вы встретили Огра', )
+    print('Вы встретили Огра')
     enemy = Enemy('Огр')
     enemy.all_info()
     battle(enemy)
-    print('Вы встретили Циклопа', )
+    print('Вы встретили Циклопа')
     enemy = Enemy('Циклоп')
     enemy.all_info()
     battle(enemy)
