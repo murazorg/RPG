@@ -81,7 +81,7 @@ class Character:
     def print_effects(self):
         a = []
         for keys in self.effects:
-            if get(keys):
+            if self.effects.get(keys):
                 a.append(keys)
         return a
 
@@ -205,7 +205,7 @@ class Character:
         self.menu()
 
     def take_attack(self, enemy, attack):
-        if 'Ипоцентр' in enemy.effects:
+        if 'Гипоцентр' in enemy.effects:
             if randint(0, 100) <= 25:
                 return False
         if 'Гнев орка' in enemy.effects:
@@ -274,7 +274,7 @@ class Enemy:
     def print_effects(self):
         a = []
         for keys in self.effects:
-            if get(keys):
+            if self.effects.get(keys):
                 a.append(keys)
         return a
 
@@ -426,6 +426,9 @@ class Skill:
                 if (person.name_list[2] or person.name_list[5] or person.name_list[8]) and\
                         (person.name_list[9] is False):
                     print('4 - Гипоцентр')
+                print('5 - ИНФО')
+                print('0 - Назад')
+                self.choose_skill('earth')
             case '2':
                 print('\nВыберете способность для изучения:')
                 false_count = person.name_list[10:13].count(False)
@@ -685,11 +688,11 @@ class Skill:
                         print('Слои песка заблокировали все {0} урона'.format(block))
         return block
 
-    def ipocent(self, enemy):
+    def gipocent(self, enemy):
         if person.name_list[9]:
             if self.mana_check(9):
                 person.mp -= self.cost
-                enemy.effects['Ипоцентр'] = True
+                enemy.effects['Гипоцентр'] = True
                 print('Земля вокруг задрожала и противник начал терять равновесие. '
                       'Вы затратили на это {0} маны'.format(self.cost))
                 return self.time_list[9]
@@ -734,7 +737,7 @@ class Skill:
                 del person.effects['Каменная кожа. 3ур']
                 person.armor -= 12
             case 9:
-                del enemy.effects['Ипоцентр']
+                del enemy.effects['Гипоцентр']
             case 10:
                 del person.effects['Водный щит. 1ур']
                 person.shield = 0
@@ -778,11 +781,12 @@ def check(timer, enemy):
 
 
 def skill_number():
-    if person.name_list.count(False) < len(person.name_list[0:10]):
+    print('Выберите аспект:')
+    if person.name_list[0:10].count(False) < len(person.name_list[0:10]):
         print('1                 Аспект Земли')
-    if person.name_list.count(False) < len(person.name_list[10:13]):
+    if person.name_list[10:13].count(False) < len(person.name_list[10:13]):
         print('2                 Аспект Воды')
-    choice = input('Выберите аспект\n')
+    choice = input()
     match choice:
         case '1':
             for item in reversed(person.name_list[0:3]):
@@ -838,7 +842,7 @@ def select_skill(enemy):
                     person.duration[3] = person_move
                     return True
                 case '4':
-                    person_move = skill.ipocent(enemy)
+                    person_move = skill.gipocent(enemy)
                     person.duration[9] = person_move
                     return True
                 case '0':
@@ -854,7 +858,7 @@ def select_skill(enemy):
 
 
 def enemy_effects(enemy):
-    if 'Ипоцентр' in enemy.effects:
+    if 'Гипоцентр' in enemy.effects:
         dmg = enemy.take_mag_attack(50)
         print('Ипоцентр нанёс {0} урона'.format(dmg))
     if 'Регенерация' in enemy.effects:
