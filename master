@@ -19,12 +19,12 @@ class Character:
         self.armor = 0
         self.mag_resist = 0.1
         self.lvl = 1
-        self.points = 5
+        self.points = 8
         self.name_list = [False, False, False, False, False, False, False, False, False, False,
-                          False, False, False, False, False, False]
+                          False, False, False, False, False, False, False]
         self.effects = {}
         self.duration = [False, False, False, False, False, False, False, False, False, False,
-                         False, False, False, False, False, False]
+                         False, False, False, False, False, False, False]
 
     def menu(self):
         a = False
@@ -78,6 +78,8 @@ class Character:
             if item:
                 a.append(item)
                 break
+        if self.name_list[16]:
+            a.append(self.name_list[16])
         return a
 
     def print_effects(self):
@@ -110,6 +112,8 @@ class Character:
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
+        if self.shield > 0:
+            print('Щит:                         ', self.shield)
         # print('Эффективность Брони:         ', self.armor_impact() * 100, '%\n')
         print('Активные эффекты:            ', self.print_effects(), '\n')
 
@@ -138,12 +142,12 @@ class Character:
                 self.amp_mag_dmg += 0.5 * value
 
     def calculate_max_hp(self):
-        self.max_hp = 10000
+        self.max_hp = 100
         self.max_hp += self.strength * 10
         return self.max_hp
 
     def calculate_max_mp(self):
-        self.max_mp = 5000
+        self.max_mp = 50
         self.max_mp += self.intellect * 5
         return self.max_mp
 
@@ -221,11 +225,14 @@ class Character:
 
     def take_mag_attack(self, mag_attack):
         if self.shield > 0:
+            dmg_on_shield = self.shield - mag_attack
+            if dmg_on_shield <= 0:
+                dmg_on_shield = self.shield
             mag_attack -= self.shield
             if mag_attack > 0:
-                print('Магический щит поглотил часть магического урона и разрушился')
+                print('Магический щит поглотил {0} магического урона и разрушился'.format(dmg_on_shield))
             elif mag_attack <= 0:
-                print('Магический щит поглотил магический урон')
+                print('Магический щит поглотил {0} магического урона'.format(dmg_on_shield))
                 mag_attack = 0
         impact = mag_attack - (mag_attack * self.mag_resist)
         self.hp -= round(impact)
@@ -386,7 +393,7 @@ class Skill:
         self.time_list = \
             [
                 [3, 5], [4, 5], [5, 5], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
-                [7, 3], [7, 3], [7, 3], [None], [None], [None]
+                [7, 3], [7, 3], [7, 3], [None], [None], [None], [None]
             ]
         self.cost = 0
 
@@ -473,6 +480,8 @@ class Skill:
                         print('2 - Конденсат. 3ур')
                     case 0:
                         pass
+                if (person.name_list[12] or person.name_list[15]) and (person.name_list[16] is False):
+                    print('3 - Морские змеи')
                 print('5 - ИНФО')
                 print('0 - Назад')
                 self.choose_skill('water')
@@ -564,12 +573,23 @@ class Skill:
                                 person.name_list[15] = 'Конденсат. 3ур'
                             case 0:
                                 pass
+                    case '3':
+                        false_count = person.name_list[16:17].count(False)
+                        match false_count:
+                            case 1:
+                                person.name_list[16] = 'Морские змеи'
+                            case 0:
+                                pass
                     case '5':
                         print('\n Водный щит - заклинание, которым изначально пользовались инструктора \n'
                               'на магических дуэлях, чтобы соперники не сожгли друг-друга. \n'
                               'Но во время войны ему нашли другое применение')
                         print('\n Конденсат - техника обратных потоков маны в теле, позволяющая использовать \n'
                               'отработанную ману повторно. Освоившие эту технику считаются гениями')
+                        if person.name_list[12] or person.name_list[15]:
+                            print('\nМорские змеи - вершина искусства аспекта Воды, проявляющая полноту манипуляции \n'
+                                  'в призыве ручного морского змея. Хоть они и не сильны, но обладают разумом и \n'
+                                  'набросятся на вас как только вы потеряете должную концентрацию')
                         print('\nВведите что-нибудь для возврата...')
                         input()
                         self.new()
@@ -752,21 +772,21 @@ class Skill:
                 if self.mana_check(10):
                     person.mp -= self.cost
                     person.effects['Водный щит. 1ур'] = True
-                    person.shield = 50
+                    person.shield = 50 * (1 + person.amp_mag_dmg / 100)
                     print('Вы создали вокруг себя водную сферу и затратили на это {0} маны'.format(self.cost))
                     return self.time_list[10]
             case 1:
                 if self.mana_check(11):
                     person.mp -= self.cost
                     person.effects['Водный щит. 2ур'] = True
-                    person.shield = 100
+                    person.shield = 100 * (1 + person.amp_mag_dmg / 100)
                     print('Вы создали вокруг себя водную сферу и затратили на это {0} маны'.format(self.cost))
                     return self.time_list[11]
             case 0:
                 if self.mana_check(12):
                     person.mp -= self.cost
                     person.effects['Водный щит. 3ур'] = True
-                    person.shield = 150
+                    person.shield = 150 * (1 + person.amp_mag_dmg / 100)
                     print('Вы создали вокруг себя водную сферу и затратили на это {0} маны'.format(self.cost))
                     return self.time_list[12]
 
@@ -800,6 +820,13 @@ class Skill:
                     if person.mp > person.max_mp:
                         person.mp = person.max_mp
                     print('Вы сконденсировали {0} маны'.format(condensate))
+
+    def sea_snakes(self, enemy):
+        if person.name_list[16]:
+            dmg = enemy.take_mag_attack(person.intellect * 0.5)
+            enemy.hp -= dmg
+            enemy.mag_resist -= 0.01
+            print('Морские змеи нанесли {0} урона. {1} стал чувствительнее к мане'.format(dmg, enemy.name))
 
     def disspell(self, person, enemy, skill_id):
         match skill_id:
@@ -950,13 +977,13 @@ def enemy_effects(enemy):
 def battle(enemy):
     count = 1
     person.duration = [False, False, False, False, False, False, False, False, False, False,
-                       False, False, False, False, False, False]
+                       False, False, False, False, False, False, False]
     pass
     while enemy.hp > 0 and person.hp > 0:
         skill.time_list = \
             [
                 [4, 6], [5, 6], [6, 6], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
-                [7, 3], [7, 3], [7, 3], [None], [None], [None]
+                [7, 3], [7, 3], [7, 3], [None], [None], [None], [None]
             ]
         check(person.duration, enemy)
         person.battle_info()
@@ -974,14 +1001,13 @@ def battle(enemy):
                     break
                 case '2':
                     if select_skill(enemy):
-                        for item in reversed(person.name_list[13:16]):
-                            if item:
-                                skill.condensate()
                         break
                     else:
                         continue
                 case _:
                     continue
+        skill.condensate()
+        skill.sea_snakes(enemy)
         enemy_effects(enemy)
         if enemy.hp <= 0:
             if 'Каменная кожа. 1ур' in person.effects:
