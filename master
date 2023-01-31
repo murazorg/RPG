@@ -9,31 +9,24 @@ class Character:
         print('Введите имя для своего персонажа')
         self.name = input()
         self.strength = 0
-        self.old_strength = 0  # Не используется
         self.agility = 0
-        self.old_agility = 0  # Не используется
         self.intellect = 0
-        self.old_intellect = 0  # Не используется
         self.hp = 100
         self.max_hp = 100
-        self.old_hp = 100  # Не используется
+        self.shield = 0
         self.dmg = 40
-        self.old_dmg = 10  # Не используется
         self.mp = 50
         self.max_mp = 50
-        self.old_mp = 50  # Не используется
         self.amp_mag_dmg = 0
-        self.old_amp_mag_dmg = 0  # Не используется
         self.armor = 0
-        self.old_armor = 0  # Не используется
         self.mag_resist = 0.1
-        self.old_mag_resist = 0  # Не используется
         self.lvl = 1
         self.points = 5
-        # self.skills = []  # Не используется
-        self.name_list = [False, False, False, False, False, False, False, False, False, False]
+        self.name_list = [False, False, False, False, False, False, False, False, False, False,
+                          False, False, False]
         self.effects = {}
-        self.duration = [False, False, False, False, False, False, False, False, False, False]
+        self.duration = [False, False, False, False, False, False, False, False, False, False,
+                         False, False, False]
 
     def menu(self):
         a = False
@@ -79,6 +72,17 @@ class Character:
                 break
         if self.name_list[9]:
             a.append(self.name_list[9])
+        for item in reversed(self.name_list[10:13]):
+            if item:
+                a.append(item)
+                break
+        return a
+
+    def print_effects(self):
+        a = []
+        for keys in self.effects:
+            if get(keys):
+                a.append(keys)
         return a
 
     def all_info(self):
@@ -96,7 +100,7 @@ class Character:
         print('Броня:                       ', self.armor)
         print('Сопротивление магии:         ', round(self.mag_resist, 3) * 100, '%')
         print('Умения:                      ', self.print_skills())
-        print('Все умения:             ', self.name_list)  # Откладка скиллов
+        # print('Все умения:             ', self.name_list)  # Откладка скиллов
         self.menu()
 
     def battle_info(self):
@@ -104,7 +108,8 @@ class Character:
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
-        print('Эффективность Брони:         ', self.armor_impact() * 100, '%\n')
+        # print('Эффективность Брони:         ', self.armor_impact() * 100, '%\n')
+        print('Активные эффекты:            ', self.print_effects(), '\n')
 
     def armor_impact(self):
         damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
@@ -209,8 +214,20 @@ class Character:
                 print(enemy.name, 'совершил критическую атаку!')
         attack -= skill.inertial_damping(attack)  # Attack reduced block
         impact = attack - (attack * self.armor_impact())
-        self.hp -= round(impact, 0)
-        return round(impact, 0)
+        self.hp -= round(impact)
+        return round(impact)
+
+    def take_mag_attack(self, mag_attack):
+        if self.shield > 0:
+            mag_attack -= self.shield
+            if mag_attack > 0:
+                print('Магический щит поглотил часть магического урона и разрушился')
+            elif mag_attack <= 0:
+                print('Магический щит поглотил магический урон')
+                mag_attack = 0
+        impact = mag_attack - (mag_attack * self.mag_resist)
+        self.hp -= round(impact)
+        return round(impact)
 
 
 class Enemy:
@@ -254,6 +271,13 @@ class Enemy:
                 self.mag_resist = 0.3
                 self.effects = {'Ярость': False, 'Крепкая кожа': True}
 
+    def print_effects(self):
+        a = []
+        for keys in self.effects:
+            if get(keys):
+                a.append(keys)
+        return a
+
     def all_info(self):
         print(self.name)
         print('Здоровье:                    ', self.hp)
@@ -267,7 +291,7 @@ class Enemy:
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
-        print('Эффекты:                     ', self.effects)
+        print('Активные эффекты:            ', self.print_effects())
 
     def armor_impact(self):
         damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
@@ -339,7 +363,8 @@ class Skill:
     def __init__(self):
         self.time_list = \
             [
-                [3, 5], [4, 5], [5, 5], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6]
+                [3, 5], [4, 5], [5, 5], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
+                [7, 3], [7, 3], [7, 3]
             ]
         self.cost = 0
 
@@ -362,6 +387,9 @@ class Skill:
         false_count = person.name_list[0:10].count(False)
         if false_count > 0:
             print('1                 Аспект Земли')
+        false_count = person.name_list[10:13].count(False)
+        if false_count > 0 and person.name_list[9]:
+            print('2                 Аспект Воды')
         match input():
             case '1':
                 print('\nВыберете способность для изучения:')
@@ -398,9 +426,21 @@ class Skill:
                 if (person.name_list[2] or person.name_list[5] or person.name_list[8]) and\
                         (person.name_list[9] is False):
                     print('4 - Гипоцентр')
+            case '2':
+                print('\nВыберете способность для изучения:')
+                false_count = person.name_list[10:13].count(False)
+                match false_count:
+                    case 3:
+                        print('1 - Водный щит. 1ур')
+                    case 2:
+                        print('1 - Водный щит. 2ур')
+                    case 1:
+                        print('1 - Водный щит. 3ур')
+                    case 0:
+                        pass
                 print('5 - ИНФО')
                 print('0 - Назад')
-                self.choose_skill('earth')
+                self.choose_skill('water')
 
     def choose_skill(self, aspect):
         choice = input()
@@ -465,6 +505,28 @@ class Skill:
                         self.new()
                     case '0':
                         self.new()
+            case 'water':
+                match choice:
+                    case '1':
+                        false_count = person.name_list[10:13].count(False)
+                        match false_count:
+                            case 3:
+                                person.name_list[10] = 'Водный щит. 1ур'
+                            case 2:
+                                person.name_list[11] = 'Водный щит. 2ур'
+                            case 1:
+                                person.name_list[12] = 'Водный щит. 3ур'
+                            case 0:
+                                pass
+                    case '5':
+                        print('\n Водный щит - заклинание, которым изначально пользовались инструктора \n'
+                              'на магических дуэлях, чтобы соперники не сожгли друг-друга. \n'
+                              'Но во время войны ему нашли другое применение')
+                        print('\nВведите что-нибудь для возврата...')
+                        input()
+                        self.new()
+                    case '0':
+                        self.new()
 
     def mana_check(self, id_skill):
         match id_skill:
@@ -506,6 +568,24 @@ class Skill:
                     return False
             case 9:
                 self.cost = 120
+                if person.mp >= self.cost:
+                    return True
+                else:
+                    return False
+            case 10:
+                self.cost = 80
+                if person.mp >= self.cost:
+                    return True
+                else:
+                    return False
+            case 11:
+                self.cost = 80
+                if person.mp >= self.cost:
+                    return True
+                else:
+                    return False
+            case 12:
+                self.cost = 80
                 if person.mp >= self.cost:
                     return True
                 else:
@@ -617,6 +697,31 @@ class Skill:
                 print('Не получилось прочесть заклинание')
                 return False
 
+    def water_shield(self):
+        false_count = person.name_list[10:13].count(False)
+        match false_count:
+            case 2:
+                if self.mana_check(10):
+                    person.mp -= self.cost
+                    person.effects['Водный щит. 1ур'] = True
+                    person.shield = 50
+                    print('Вы создали вокруг себя водную сферу и затратили на это {0} маны'.format(self.cost))
+                    return self.time_list[10]
+            case 1:
+                if self.mana_check(11):
+                    person.mp -= self.cost
+                    person.effects['Водный щит. 2ур'] = True
+                    person.shield = 100
+                    print('Вы создали вокруг себя водную сферу и затратили на это {0} маны'.format(self.cost))
+                    return self.time_list[11]
+            case 0:
+                if self.mana_check(12):
+                    person.mp -= self.cost
+                    person.effects['Водный щит. 3ур'] = True
+                    person.shield = 150
+                    print('Вы создали вокруг себя водную сферу и затратили на это {0} маны'.format(self.cost))
+                    return self.time_list[12]
+
     def disspell(self, person, enemy, skill_id):
         match skill_id:
             case 0:
@@ -630,6 +735,15 @@ class Skill:
                 person.armor -= 12
             case 9:
                 del enemy.effects['Ипоцентр']
+            case 10:
+                del person.effects['Водный щит. 1ур']
+                person.shield = 0
+            case 11:
+                del person.effects['Водный щит. 2ур']
+                person.shield = 0
+            case 12:
+                del person.effects['Водный щит. 3ур']
+                person.shield = 0
 
 
 def skill_id(skill_id):
@@ -641,6 +755,8 @@ def skill_id(skill_id):
             name = 'Земляные шипы'
         case 9:
             name = 'Гипоцентр'
+        case 10 | 11 | 12:
+            name = 'Водный щит'
     return name
 
 
@@ -654,7 +770,7 @@ def check(timer, enemy):
             elif i[0] == 0:
                 print('Умение {0} перестало действовать'.format(skill_id(timer.index(i))))
                 skill.disspell(person, enemy, timer.index(i))
-            elif i[1] == 0:
+            elif i[1] <= 0:
                 print('Умение {0} снова доступно'.format(skill_id(timer.index(i))))
                 index = timer.index(i)
                 timer[index] = False
@@ -662,53 +778,79 @@ def check(timer, enemy):
 
 
 def skill_number():
-    for item in reversed(person.name_list[0:3]):
-        if item:  # Скилл изучен
-            if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
-                if skill.mana_check(person.name_list.index(item)):
-                    print('                              1    {0}'.format(item))
-                else:
-                    print('Недостаточно маны!            1    {0}'.format(item))
-                break
-    for item in reversed(person.name_list[3:6]):
-        if item:  # Скилл изучен
-            if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
-                if skill.mana_check(person.name_list.index(item)):
-                    print('                              2    {0}'.format(item))
-                else:
-                    print('Недостаточно маны!            2    {0}'.format(item))
-                break
-    for item in reversed(person.name_list[9:10]):
-        if item:  # Скилл изучен
-            if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
-                if skill.mana_check(person.name_list.index(item)):
-                    print('                              4    {0}'.format(item))
-                else:
-                    print('Недостаточно маны!            4    {0}'.format(item))
-                break
+    if person.name_list.count(False) < len(person.name_list[0:10]):
+        print('1                 Аспект Земли')
+    if person.name_list.count(False) < len(person.name_list[10:13]):
+        print('2                 Аспект Воды')
+    choice = input('Выберите аспект\n')
+    match choice:
+        case '1':
+            for item in reversed(person.name_list[0:3]):
+                if item:  # Скилл изучен
+                    if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
+                        if skill.mana_check(person.name_list.index(item)):
+                            print('                              1    {0}'.format(item))
+                        else:
+                            print('Недостаточно маны!            1    {0}'.format(item))
+                        break
+            for item in reversed(person.name_list[3:6]):
+                if item:  # Скилл изучен
+                    if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
+                        if skill.mana_check(person.name_list.index(item)):
+                            print('                              2    {0}'.format(item))
+                        else:
+                            print('Недостаточно маны!            2    {0}'.format(item))
+                        break
+            for item in reversed(person.name_list[9:10]):
+                if item:  # Скилл изучен
+                    if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
+                        if skill.mana_check(person.name_list.index(item)):
+                            print('                              4    {0}'.format(item))
+                        else:
+                            print('Недостаточно маны!            4    {0}'.format(item))
+                        break
+            return 'earth'
+        case '2':
+            for item in reversed(person.name_list[10:13]):
+                if item:  # Скилл изучен
+                    if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
+                        if skill.mana_check(person.name_list.index(item)):
+                            print('                              1    {0}'.format(item))
+                        else:
+                            print('Недостаточно маны!            1    {0}'.format(item))
+                        break
+            return 'water'
     print('                              0    Назад')
 
 
 def select_skill(enemy):
-    skill_number()
+    aspect = skill_number()
     choose = input()
-    match choose:
-        case '1':
-            person_move = skill.stone_skin()
-            person.duration[0] = person_move
-            return True
-        case '2':
-            person_move = skill.earth_spike(enemy)
-            person.duration[3] = person_move
-            return True
-        case '4':
-            person_move = skill.ipocent(enemy)
-            person.duration[9] = person_move
-            return True
-        case '0':
-            pass
-        case _:
-            pass
+    match aspect:
+        case 'earth':
+            match choose:
+                case '1':
+                    person_move = skill.stone_skin()
+                    person.duration[0] = person_move
+                    return True
+                case '2':
+                    person_move = skill.earth_spike(enemy)
+                    person.duration[3] = person_move
+                    return True
+                case '4':
+                    person_move = skill.ipocent(enemy)
+                    person.duration[9] = person_move
+                    return True
+                case '0':
+                    select_skill(enemy)
+                case _:
+                    pass
+        case 'water':
+            match choose:
+                case '1':
+                    person_move = skill.water_shield()
+                    person.duration[10] = person_move
+                    return True
 
 
 def enemy_effects(enemy):
@@ -721,12 +863,14 @@ def enemy_effects(enemy):
 
 def battle(enemy):
     count = 1
-    person.duration = [False, False, False, False, False, False, False, False, False, False]
+    person.duration = [False, False, False, False, False, False, False, False, False, False,
+                       False, False, False]
     pass
     while enemy.hp > 0 and person.hp > 0:
         skill.time_list = \
             [
-                [4, 6], [5, 6], [6, 6], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6]
+                [4, 6], [5, 6], [6, 6], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
+                [7, 3], [7, 3], [7, 3]
             ]
         check(person.duration, enemy)
         person.battle_info()
@@ -752,11 +896,23 @@ def battle(enemy):
         enemy_effects(enemy)
         if enemy.hp <= 0:
             if 'Каменная кожа. 1ур' in person.effects:
-                skill.disspell(person, enemy, 0)
+                del person.effects['Каменная кожа. 1ур']
+                person.armor -= 4
             if 'Каменная кожа. 2ур' in person.effects:
-                skill.disspell(person, enemy, 1)
+                del person.effects['Каменная кожа. 2ур']
+                person.armor -= 8
             if 'Каменная кожа. 3ур' in person.effects:
-                skill.disspell(person, enemy, 2)
+                del person.effects['Каменная кожа. 3ур']
+                person.armor -= 12
+            if 'Водный щит. 1ур' in person.effects:
+                del person.effects['Водный щит. 1ур']
+                person.shield = 0
+            if 'Водный щит. 2ур' in person.effects:
+                del person.effects['Водный щит. 2ур']
+                person.shield = 0
+            if 'Водный щит. 3ур' in person.effects:
+                del person.effects['Водный щит. 3ур']
+                person.shield = 0
             print('\nВы победили!\n')
             continue
         dmg = person.take_attack(enemy, enemy.dmg)
