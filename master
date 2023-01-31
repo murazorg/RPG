@@ -23,10 +23,10 @@ class Character:
         self.lvl = 1
         self.points = 5
         self.name_list = [False, False, False, False, False, False, False, False, False, False,
-                          False, False, False]
+                          False, False, False, False, False, False]
         self.effects = {}
         self.duration = [False, False, False, False, False, False, False, False, False, False,
-                         False, False, False]
+                         False, False, False, False, False, False]
 
     def menu(self):
         a = False
@@ -73,6 +73,10 @@ class Character:
         if self.name_list[9]:
             a.append(self.name_list[9])
         for item in reversed(self.name_list[10:13]):
+            if item:
+                a.append(item)
+                break
+        for item in reversed(self.name_list[13:16]):
             if item:
                 a.append(item)
                 break
@@ -364,7 +368,7 @@ class Skill:
         self.time_list = \
             [
                 [3, 5], [4, 5], [5, 5], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
-                [7, 3], [7, 3], [7, 3]
+                [7, 3], [7, 3], [7, 3], [None], [None], [None]
             ]
         self.cost = 0
 
@@ -387,7 +391,7 @@ class Skill:
         false_count = person.name_list[0:10].count(False)
         if false_count > 0:
             print('1                 Аспект Земли')
-        false_count = person.name_list[10:13].count(False)
+        false_count = person.name_list[10:16].count(False)
         if false_count > 0 and person.name_list[9]:
             print('2                 Аспект Воды')
         match input():
@@ -439,6 +443,16 @@ class Skill:
                         print('1 - Водный щит. 2ур')
                     case 1:
                         print('1 - Водный щит. 3ур')
+                    case 0:
+                        pass
+                false_count = person.name_list[13:16].count(False)
+                match false_count:
+                    case 3:
+                        print('2 - Конденсат. 1ур')
+                    case 2:
+                        print('2 - Конденсат. 2ур')
+                    case 1:
+                        print('2 - Конденсат. 3ур')
                     case 0:
                         pass
                 print('5 - ИНФО')
@@ -521,10 +535,23 @@ class Skill:
                                 person.name_list[12] = 'Водный щит. 3ур'
                             case 0:
                                 pass
+                    case '2':
+                        false_count = person.name_list[13:16].count(False)
+                        match false_count:
+                            case 3:
+                                person.name_list[13] = 'Конденсат. 1ур'
+                            case 2:
+                                person.name_list[14] = 'Конденсат. 2ур'
+                            case 1:
+                                person.name_list[15] = 'Конденсат. 3ур'
+                            case 0:
+                                pass
                     case '5':
                         print('\n Водный щит - заклинание, которым изначально пользовались инструктора \n'
                               'на магических дуэлях, чтобы соперники не сожгли друг-друга. \n'
                               'Но во время войны ему нашли другое применение')
+                        print('\n Конденсат - техника обратных потоков маны в теле, позволяющая использовать \n'
+                              'отработанную ману повторно. Освоившие эту технику считаются гениями')
                         print('\nВведите что-нибудь для возврата...')
                         input()
                         self.new()
@@ -725,6 +752,37 @@ class Skill:
                     print('Вы создали вокруг себя водную сферу и затратили на это {0} маны'.format(self.cost))
                     return self.time_list[12]
 
+    def condensate(self):
+        false_count = person.name_list[13:16].count(False)
+        match false_count:
+            case 2:
+                if person.mp < person.max_mp:
+                    condensate = person.max_mp * 0.05
+                    if condensate > 100:
+                        condensate = 100
+                    person.mp += condensate
+                    if person.mp > person.max_mp:
+                        person.mp = person.max_mp
+                    print('Вы сконденсировали {0} маны'.format(condensate))
+            case 1:
+                if person.mp < person.max_mp:
+                    condensate = person.max_mp * 0.1
+                    if condensate > 100:
+                        condensate = 100
+                    person.mp += condensate
+                    if person.mp > person.max_mp:
+                        person.mp = person.max_mp
+                    print('Вы сконденсировали {0} маны'.format(condensate))
+            case 0:
+                if person.mp < person.max_mp:
+                    condensate = person.max_mp * 0.15
+                    if condensate > 100:
+                        condensate = 100
+                    person.mp += condensate
+                    if person.mp > person.max_mp:
+                        person.mp = person.max_mp
+                    print('Вы сконденсировали {0} маны'.format(condensate))
+
     def disspell(self, person, enemy, skill_id):
         match skill_id:
             case 0:
@@ -848,13 +906,17 @@ def select_skill(enemy):
                 case '0':
                     select_skill(enemy)
                 case _:
-                    pass
+                    select_skill(enemy)
         case 'water':
             match choose:
                 case '1':
                     person_move = skill.water_shield()
                     person.duration[10] = person_move
                     return True
+                case '0':
+                    select_skill(enemy)
+                case _:
+                    select_skill(enemy)
 
 
 def enemy_effects(enemy):
@@ -868,13 +930,13 @@ def enemy_effects(enemy):
 def battle(enemy):
     count = 1
     person.duration = [False, False, False, False, False, False, False, False, False, False,
-                       False, False, False]
+                       False, False, False, False, False, False]
     pass
     while enemy.hp > 0 and person.hp > 0:
         skill.time_list = \
             [
                 [4, 6], [5, 6], [6, 6], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
-                [7, 3], [7, 3], [7, 3]
+                [7, 3], [7, 3], [7, 3], [None], [None], [None]
             ]
         check(person.duration, enemy)
         person.battle_info()
@@ -892,6 +954,9 @@ def battle(enemy):
                     break
                 case '2':
                     if select_skill(enemy):
+                        for item in reversed(person.name_list[13:16]):
+                            if item:
+                                skill.condensate()
                         break
                     else:
                         continue
