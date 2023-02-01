@@ -19,7 +19,7 @@ class Character:
         self.armor = 0
         self.mag_resist = 0.1
         self.lvl = 1
-        self.points = 10
+        self.points = 1
         self.name_list = [False, False, False, False, False, False, False, False, False, False,
                           False, False, False, False, False, False, False,
                           False, False, False, False, False, False, False]
@@ -43,7 +43,7 @@ class Character:
             case '1':
                 self.all_info()
             case '2':
-                scenario_1()
+                return True
             case '3':
                 self.chill()
             case '4':
@@ -154,12 +154,12 @@ class Character:
                 self.amp_mag_dmg += 0.5 * value
 
     def calculate_max_hp(self):
-        self.max_hp = 1000
+        self.max_hp = 100
         self.max_hp += self.strength * 10
         return self.max_hp
 
     def calculate_max_mp(self):
-        self.max_mp = 500
+        self.max_mp = 50
         self.max_mp += self.intellect * 5
         return self.max_mp
 
@@ -1264,9 +1264,9 @@ def battle(enemy):
         elif dmg is False:
             print('Противник промахнулся')
         count += 1
-        if len(person.duration) > 0:  # Для откладки duration
-            print(person.duration)
-            print(skill.time_list)
+        # if len(person.duration) > 0:  # Для откладки duration
+        #     print(person.duration)
+        #     print(skill.time_list)
     if person.hp <= 0:
         print('\nВы проиграли, игра окончена...')
         sleep(5)
@@ -1274,34 +1274,159 @@ def battle(enemy):
 
 
 def scenario_1():
-    print('')
+    print("В диких лесах...")
+    sleep(1)
+    print("Вы, как обычно, варили похлёбку из оленины. \n"
+          "Однако, когда пришло время закидывать мясо, вы заметили что его нет! Вы решили исправить эту проблему")
+    input()
+    for i in range(2):
+        i += 1
+        sleep(1)
+        print('.')
+    print('Выйдя на охоту за дичью, вы так ничего и не смогли найти, однако вместо дичи...\n')
+    sleep(3)
     # Здесь должна быть функция случайного слабого врага. Пока просто гоблин
-    print('Вы встретили Гоблина')
+    print('Вы встретили Гоблина!')
     enemy = Enemy('Гоблин')
     enemy.all_info()
     battle(enemy)
     # Здесь должна быть динамическая функция награды за противника
-    print('Вы встретили Малого энта')
+    print('Да не одного!')
+    enemy = Enemy('Гоблин')
+    enemy.all_info()
+    battle(enemy)
+    print('После небольшой охоты вы возвращаетесь домой', end='')
+    for i in range(3):
+        i += 1
+        sleep(1)
+        print('.', end='')
+    person.points += 2
+    print("Недалеко от хижины вы решили развесить на деревьях уши убитых гоблинов")
+    # Здесь должна быть функция хаба
+    person.menu()
+
+def scenario_2():
+    print('Узнав что в ваших лесах бродят гоблины, вы решили разведать территорию')
+    input()
+    for i in range(2):
+        i += 1
+        sleep(1)
+        print('.')
+    print('Вы зашли уже достаточно далеко, однако не встретили ни одного гоблина, вы насторожились и продолжили путь')
+    input()
+    for i in range(2):
+        i += 1
+        sleep(1)
+        print('.')
+    print('После ещё нескольких часов поиска вы насткнулись на Энта!\n')
     enemy = Enemy('Малый энт')
     enemy.all_info()
     battle(enemy)
-    print('Вы встретили Орка')
+    print('Совершив решающий удар по, и без того, слабому противнику, из кустов вышел ещё один Энт!')
+    enemy = Enemy('Малый энт')
+    enemy.all_info()
+    battle(enemy)
+    print('На шум прибежал Орк. У него был орочий тесак и небольшой круглый щит')
     enemy = Enemy('Орк')
     enemy.all_info()
     battle(enemy)
-    print('Вы встретили Огра')
+    print('С охапкой хвороста и новым трофейным мечом вы возвращаетесь домой', end='')
+    for i in range(3):
+        i += 1
+        sleep(1)
+        print('.', end='')
+    person.points += 2
+    # Здесь должна быть функция хаба
+    person.menu()
+
+def scenario_3():
+    print('Хорошо отдохнув, вы решили завершить дело до конца. На этот раз вы не стали идти в том же направлении')
+    input()
+    for i in range(2):
+        i += 1
+        sleep(1)
+        print('.')
+    print('Удача! После нескольких часов пути, вы увидели дым, поднимающийся из пещеры')
+    input()
+    for i in range(2):
+        i += 1
+        sleep(1)
+        print('.')
+    print("Тихонько зайдя в пещеру и услышав голоса, вы прислушались")
+    input()
+    print("В старых песнях поётся: орков создали, чтобы бить демонов!")
+    sleep(1)
+    print("Старые песни правильные – демоны зло!")
+    sleep(1)
+    print('Решив подсмотреть, вы невольно задели старую опору, и она с грохотом обрушилась, \n'
+          'оставив вас лежать перед Орком и Огром')
+    enemy = Enemy('Орк')
+    enemy.all_info()
+    battle(enemy)
+    print('После смерти своего собрата, до Огра дошло что никто больше не приготовит ему еду. Он взревел!')
     enemy = Enemy('Огр')
     enemy.all_info()
     battle(enemy)
-    print('Вы встретили Циклопа')
+    print('Из последних сил срубив Огру голову, вы не стали испытывать удачу и продвигаться вглубь пещеры\n'
+          'Выбравшись на поверхность, вы пошли домой', end='')
+    for i in range(3):
+        i += 1
+        sleep(1)
+        print('.', end='')
+    print("Засолив голову и подвесив её возле входа, вы сложили второй трофейный меч")
+    person.points += 4
+    # Здесь должна быть функция хаба
+    person.menu()
+
+def scenario_4():
+    print('Собравшись с силами и взяв все необходимое снаряжение, вы отправились исследовать глубины той пещеры')
+    input()
+    for i in range(2):
+        i += 1
+        sleep(1)
+        print('.')
+    print("После нескольких часов пути, вы снова пробрались в неё и стали углубляться")
+    input()
+    for i in range(2):
+        i += 1
+        sleep(1)
+        print('.')
+    print("На достаточной глубине оказалось большое подземное озеро, домик и большие ворота в скалу")
+    sleep(1)
+    print("Возле ворот стояло два Орка. Заприметив вас, они вступили в бой")
+    enemy = Enemy('Орк')
+    enemy.all_info()
+    battle(enemy)
+    enemy = Enemy('Орк')
+    enemy.all_info()
+    battle(enemy)
+    print("Расправившись с Орками, вы исследовали домик на берегу озера. В нем вы нашли большой черный ключ\n"
+          "Решив, что он от тех ворот, вы поспешили им воспользоваться")
+    input()
+    for i in range(2):
+        i += 1
+        sleep(1)
+        print('.')
+    print("Отворив врата, внутри вас ждал дикий Циклоп!")
     enemy = Enemy('Циклоп')
     enemy.all_info()
     battle(enemy)
-    print('После небольшого путешествия вы возвращаетесь домой')
-    # Здесь должна быть функция хаба
-    person.menu()
+    print('После серьезной схватки и пронзенного глаза чудища, вы возвращаетесь домой', end='')
+    for i in range(3):
+        i += 1
+        sleep(1)
+        print('.', end='')
+    print("Окончив все свои опасные путешествия, вы устроили большой ужин из печени Циклопа.\n"
+          "Кто же знал, что обычная охота может обернуться в такой подвиг! Это славная история")
+    sleep(10)
+    exit()
+
 
 enemy = Enemy('None')
 skill = Skill()
 person = Character()
 person.menu()
+scenario_1()
+scenario_2()
+scenario_3()
+scenario_4()
