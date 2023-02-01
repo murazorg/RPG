@@ -1149,10 +1149,6 @@ def enemy_effects(enemy):
         dmg = enemy.take_mag_attack(50)
         dmg = round(dmg)
         print('Ипоцентр нанёс {0} урона'.format(dmg))
-    if 'Регенерация' in enemy.effects:
-        enemy.effects['Регенерация'] = True
-    if 'Заживление' in enemy.effects:
-        enemy.effects['Заживление'] = True
     if 'Поджиг. 1ур' in enemy.effects:
         dmg = enemy.take_mag_attack(person.agility * 0.25)
         dmg = round(dmg)
@@ -1165,6 +1161,10 @@ def enemy_effects(enemy):
         dmg = enemy.take_mag_attack(person.agility * 0.75)
         dmg = round(dmg)
         print('Поджиг нанёс {0} урона'.format(dmg))
+    if 'Регенерация' in enemy.effects:
+        enemy.effects['Регенерация'] = True
+    if 'Заживление' in enemy.effects:
+        enemy.effects['Заживление'] = True
 
 def battle(enemy):
     count = 1
