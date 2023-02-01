@@ -939,7 +939,7 @@ class Skill:
                     person.mp -= self.cost
                     print('Вы окутали своё оружие пламенной яростью и атаковали противника. '
                           'Вы затратили на это {0} маны'.format(self.cost))
-                    enemy.take_attack(person.dmg)
+                    print(enemy.name, 'получил', enemy.take_attack(person.dmg), 'урона')
                     enemy.effects['Поджиг. 1ур'] = True
                     return self.time_list[20]
             case 1:
@@ -947,7 +947,7 @@ class Skill:
                     person.mp -= self.cost
                     print('Вы окутали своё оружие пламенной яростью и атаковали противника. '
                           'Вы затратили на это {0} маны'.format(self.cost))
-                    enemy.take_attack(person.dmg)
+                    print(enemy.name, 'получил', enemy.take_attack(person.dmg), 'урона')
                     enemy.effects['Поджиг. 2ур'] = True
                     return self.time_list[21]
             case 0:
@@ -955,7 +955,7 @@ class Skill:
                     person.mp -= self.cost
                     print('Вы окутали своё оружие пламенной яростью и атаковали противника. '
                           'Вы затратили на это {0} маны'.format(self.cost))
-                    enemy.take_attack(person.dmg)
+                    print(enemy.name, 'получил', enemy.take_attack(person.dmg), 'урона')
                     enemy.effects['Поджиг. 3ур'] = True
                     return self.time_list[22]
 
@@ -1025,12 +1025,12 @@ def check(timer, enemy):
 def skill_number():
     print('Выберите аспект:')
     if person.name_list[0:10].count(False) < len(person.name_list[0:10]):
-        print('1                 Аспект Земли')
+        print('                              1  Аспект Земли')
     if person.name_list[10:13].count(False) < len(person.name_list[10:13]):
-        print('2                 Аспект Воды')
+        print('                              2  Аспект Воды')
     if person.name_list[17:20].count(False) < len(person.name_list[20:23]):
-        print('3                 Аспект Огня')
-    print('0                 Назад')
+        print('                              3  Аспект Огня')
+    print('                              0  Назад')
     choice = input()
     match choice:
         case '1':
@@ -1058,6 +1058,7 @@ def skill_number():
                         else:
                             print('Недостаточно маны!            4    {0}'.format(item))
                         break
+            print('                              0    Назад')
             return 'earth'
         case '2':
             for item in reversed(person.name_list[10:13]):
@@ -1068,25 +1069,26 @@ def skill_number():
                         else:
                             print('Недостаточно маны!            1    {0}'.format(item))
                         break
+            print('                              0    Назад')
             return 'water'
         case '3':
             for item in reversed(person.name_list[20:23]):
                 if item:  # Скилл изучен
                     if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
                         if skill.mana_check(person.name_list.index(item)):
-                            print('                              1    {0}'.format(item))
+                            print('                              2    {0}'.format(item))
                         else:
-                            print('Недостаточно маны!            1    {0}'.format(item))
+                            print('Недостаточно маны!            2    {0}'.format(item))
                         break
+            print('                              0    Назад')
             return 'fire'
         case '0':
-            skill_number()
-    print('                              0    Назад')
-
+            return 'pass'
 
 def select_skill(enemy):
     aspect = skill_number()
-    choose = input()
+    if aspect != 'pass':
+        choose = input()
     match aspect:
         case 'earth':
             match choose:
@@ -1095,12 +1097,14 @@ def select_skill(enemy):
                     for item in reversed(person.name_list[0:3]):
                         if item:
                             person.duration[person.name_list.index(item)] = person_move
+                            break
                     return True
                 case '2':
                     person_move = skill.earth_spike(enemy)
                     for item in reversed(person.name_list[3:6]):
                         if item:
                             person.duration[person.name_list.index(item)] = person_move
+                            break
                     return True
                 case '4':
                     person_move = skill.gipocent(enemy)
@@ -1117,6 +1121,7 @@ def select_skill(enemy):
                     for item in reversed(person.name_list[10:13]):
                         if item:
                             person.duration[person.name_list.index(item)] = person_move
+                            break
                     return True
                 case '0':
                     select_skill(enemy)
@@ -1129,11 +1134,14 @@ def select_skill(enemy):
                     for item in reversed(person.name_list[20:23]):
                         if item:
                             person.duration[person.name_list.index(item)] = person_move
+                            break
                     return True
                 case '0':
                     select_skill(enemy)
                 case _:
                     select_skill(enemy)
+        case 'pass':
+            pass
 
 
 def enemy_effects(enemy):
