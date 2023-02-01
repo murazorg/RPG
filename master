@@ -22,11 +22,11 @@ class Character:
         self.points = 8
         self.name_list = [False, False, False, False, False, False, False, False, False, False,
                           False, False, False, False, False, False, False,
-                          False, False, False, False, False, False]
+                          False, False, False, False, False, False, False]
         self.effects = {}
         self.duration = [False, False, False, False, False, False, False, False, False, False,
                          False, False, False, False, False, False, False,
-                         False, False, False, False, False, False]
+                         False, False, False, False, False, False, False]
 
     def menu(self):
         a = False
@@ -90,6 +90,8 @@ class Character:
             if item:
                 a.append(item)
                 break
+        if self.name_list[23]:
+            a.append(self.name_list[23])
         return a
 
     def print_effects(self):
@@ -152,12 +154,12 @@ class Character:
                 self.amp_mag_dmg += 0.5 * value
 
     def calculate_max_hp(self):
-        self.max_hp = 100
+        self.max_hp = 1000
         self.max_hp += self.strength * 10
         return self.max_hp
 
     def calculate_max_mp(self):
-        self.max_mp = 50
+        self.max_mp = 500
         self.max_mp += self.intellect * 5
         return self.max_mp
 
@@ -330,7 +332,7 @@ class Enemy:
             print('Крепкая кожа выдержала часть урона')
         skill.fusion(self)
         impact = attack - (attack * self.armor_impact())
-        self.hp -= round(impact, 0)
+        self.hp -= round(impact)
         if self.hp > 0:
             if 'Ярость' in self.effects:
                 if self.effects['Ярость'] is False:
@@ -345,11 +347,11 @@ class Enemy:
                         self.hp += 5
                         print(self.name, 'восстановил часть здоровья')
                         self.effects['Заживление'] = False
-        return round(impact, 0)
+        return round(impact)
 
     def take_mag_attack(self, mag_attack: int):
         impact = (mag_attack * (1 + (person.amp_mag_dmg / 100))) * (1 - self.mag_resist)
-        self.hp -= round(impact, 0)
+        self.hp -= round(impact)
         if self.hp > 0:
             if 'Ярость' in self.effects:
                 if self.effects['Ярость'] is False:
@@ -364,7 +366,7 @@ class Enemy:
                             self.hp += 5
                             print(self.name, 'восстановил часть здоровья')
                             self.effects['Заживление'] = False
-        return round(impact, 0)
+        return round(impact)
 
 
 class Skill:
@@ -373,7 +375,7 @@ class Skill:
             [
                 [3, 6], [4, 6], [5, 6], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
                 [7, 3], [7, 3], [7, 3], [None], [None], [None], [None],
-                [None], [None], [None], [2, 5], [3, 5], [4, 5]
+                [None], [None], [None], [2, 5], [3, 5], [4, 5], [5, 5]
             ]
         self.cost = 0
 
@@ -399,7 +401,7 @@ class Skill:
         false_count = person.name_list[10:16].count(False)
         if false_count > 0 and person.name_list[9]:
             print('2                 Аспект Воды')
-        false_count = person.name_list[17:23].count(False)
+        false_count = person.name_list[17:24].count(False)
         if false_count > 0 and person.name_list[9]:
             print('3                 Аспект Огня')
         match input():
@@ -490,6 +492,8 @@ class Skill:
                         print('2 - Поджиг. 3ур')
                     case 0:
                         pass
+                if (person.name_list[19] or person.name_list[22]) and (person.name_list[23] is False):
+                    print('3 - Огненный Аркан')
                 print('5 - ИНФО')
                 print('0 - Назад')
                 self.choose_skill('fire')
@@ -627,12 +631,23 @@ class Skill:
                                 person.name_list[22] = 'Поджиг. 3ур'
                             case 0:
                                 pass
+                    case '3':
+                        false_count = person.name_list[23:24].count(False)
+                        match false_count:
+                            case 1:
+                                person.name_list[23] = 'Огненный Аркан'
+                            case 0:
+                                pass
                     case '5':
                         print('\nПлавление - наполняет оружие термальной энергией, отчего оно начинает \n'
                               'разрушать броню соперника с каждым последующим ударом. Говорят, именно с помощью этого\n'
                               'заклинания Парлакс и расплавил Великие Врата крепости Дымогор')
                         print('\nПоджиг - пламенная ярость охватывает того, кого вы коснетесь своим оружием. \n'
                               'Во времена Седьмой войны этим заклинанием неизвестный убийца сжег дотла Короля Земли')
+                        if person.name_list[19] or person.name_list[22]:
+                            print('\nОгненный Аркан - очень мощное и опасное заклинание, взывающее к\n'
+                                  'древнему Духу Огня, питающимся жизненными силами противника \n'
+                                  'Кодекс Магов запрещает применять это заклинания')
                         print('\nВведите что-нибудь для возврата...')
                         input()
                         self.new()
@@ -715,6 +730,12 @@ class Skill:
                     return False
             case 22:
                 self.cost = 30
+                if person.mp >= self.cost:
+                    return True
+                else:
+                    return False
+            case 23:
+                self.cost = 90
                 if person.mp >= self.cost:
                     return True
                 else:
@@ -927,6 +948,14 @@ class Skill:
                     enemy.effects['Поджиг. 3ур'] = True
                     return self.time_list[22]
 
+    def fire_arcan(self, enemy):
+        if self.mana_check(23):
+            person.mp -= self.cost
+            enemy.effects['Огненный Аркан'] = True
+            print('Вы воззвали к древнему Духу Огня и {1}а пожрал живой огонь. '
+                  'Дух забрал {0} маны'.format(self.cost, enemy.name))
+            return self.time_list[23]
+
     def disspell(self, person, enemy, skill_id):
         match skill_id:
             case 0:
@@ -955,6 +984,8 @@ class Skill:
                 del enemy.effects['Поджиг. 2ур']
             case 22:
                 del enemy.effects['Поджиг. 3ур']
+            case 23:
+                del enemy.effects['Огненный Аркан']
 
 
 def skill_id(skill_id):
@@ -970,6 +1001,8 @@ def skill_id(skill_id):
             name = 'Водный щит'
         case 20 | 21 | 22:
             name = 'Поджиг'
+        case 23:
+            name = 'Огненный Аркан'
     return name
 
 
@@ -996,7 +1029,7 @@ def skill_number():
         print('                              1  Аспект Земли')
     if person.name_list[10:13].count(False) < len(person.name_list[10:13]):
         print('                              2  Аспект Воды')
-    if person.name_list[17:20].count(False) < len(person.name_list[20:23]):
+    if person.name_list[17:20].count(False) < len(person.name_list[20:24]):
         print('                              3  Аспект Огня')
     print('                              0  Назад')
     choice = input()
@@ -1011,16 +1044,16 @@ def skill_number():
                             print('Недостаточно маны!            1    {0}'.format(item))
                         break
             for item in reversed(person.name_list[3:6]):
-                if item:  # Скилл изучен
-                    if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
+                if item:
+                    if person.duration[person.name_list.index(item)] is False:
                         if skill.mana_check(person.name_list.index(item)):
                             print('                              2    {0}'.format(item))
                         else:
                             print('Недостаточно маны!            2    {0}'.format(item))
                         break
             for item in reversed(person.name_list[9:10]):
-                if item:  # Скилл изучен
-                    if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
+                if item:
+                    if person.duration[person.name_list.index(item)] is False:
                         if skill.mana_check(person.name_list.index(item)):
                             print('                              4    {0}'.format(item))
                         else:
@@ -1030,8 +1063,8 @@ def skill_number():
             return 'earth'
         case '2':
             for item in reversed(person.name_list[10:13]):
-                if item:  # Скилл изучен
-                    if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
+                if item:
+                    if person.duration[person.name_list.index(item)] is False:
                         if skill.mana_check(person.name_list.index(item)):
                             print('                              1    {0}'.format(item))
                         else:
@@ -1041,12 +1074,20 @@ def skill_number():
             return 'water'
         case '3':
             for item in reversed(person.name_list[20:23]):
-                if item:  # Скилл изучен
-                    if person.duration[person.name_list.index(item)] is False:  # Его метод не применялся
+                if item:
+                    if person.duration[person.name_list.index(item)] is False:
                         if skill.mana_check(person.name_list.index(item)):
                             print('                              2    {0}'.format(item))
                         else:
                             print('Недостаточно маны!            2    {0}'.format(item))
+                        break
+            for item in reversed(person.name_list[23:24]):
+                if item:
+                    if person.duration[person.name_list.index(item)] is False:
+                        if skill.mana_check(person.name_list.index(item)):
+                            print('                              3    {0}'.format(item))
+                        else:
+                            print('Недостаточно маны!            3    {0}'.format(item))
                         break
             print('                              0    Назад')
             return 'fire'
@@ -1104,6 +1145,10 @@ def select_skill(enemy):
                             person.duration[person.name_list.index(item)] = person_move
                             break
                     return True
+                case '3':
+                    person_move = skill.fire_arcan(enemy)
+                    person.duration[23] = person_move
+                    return True
                 case '0':
                     select_skill(enemy)
                 case _:
@@ -1132,6 +1177,10 @@ def enemy_effects(enemy):
 
 
 def debuff(enemy):
+    if 'Огненный Аркан' in enemy.effects:
+        dmg = enemy.take_mag_attack(enemy.hp * 0.1)
+        dmg = round(dmg)
+        print('Огненный Дух нанес {0} урона'.format(dmg))
     if 'Гипоцентр' in enemy.effects:
         dmg = enemy.take_mag_attack(50)
         dmg = round(dmg)
@@ -1154,14 +1203,14 @@ def battle(enemy):
     count = 1
     person.duration = [False, False, False, False, False, False, False, False, False, False,
                        False, False, False, False, False, False, False,
-                       False, False, False, False, False, False]
+                       False, False, False, False, False, False, False]
     pass
     while enemy.hp > 0 and person.hp > 0:
         skill.time_list = \
             [
                 [4, 6], [5, 6], [6, 6], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
                 [7, 3], [7, 3], [7, 3], [None], [None], [None], [None],
-                [None], [None], [None], [2, 5], [3, 5], [4, 5]
+                [None], [None], [None], [2, 5], [3, 5], [4, 5], [5, 5]
             ]
         check(person.duration, enemy)
         person.battle_info()
