@@ -339,22 +339,6 @@ class Enemy:
                         print(self.name, 'вошёл в состояние ярости')
                         self.mag_resist += 0.2
                         self.dmg += 14
-            if 'Регенерация' in self.effects:
-                if self.effects['Регенерация']:
-                    percent = self.hp / self.max_hp
-                    if 0.9 <= percent < 1:
-                        self.hp += self.max_hp * 0.02
-                    if 0.7 <= percent < 0.9:
-                        self.hp += self.max_hp * 0.04
-                    if 0.5 <= percent < 0.7:
-                        self.hp += self.max_hp * 0.06
-                    if 0.3 <= percent < 0.5:
-                        self.hp += self.max_hp * 0.08
-                    if percent < 0.3:
-                        self.hp += self.max_hp * 0.1
-                    self.hp = round(self.hp)
-                    print(self.name, 'восстановил часть здоровья')
-                    self.effects['Регенерация'] = False
             if 'Заживление' in self.effects:
                 if self.effects['Заживление']:
                     if self.hp < self.max_hp:
@@ -374,22 +358,6 @@ class Enemy:
                         print(self.name, 'вошёл в состояние ярости')
                         self.mag_resist += 0.2
                         self.dmg += 14
-            if 'Регенерация' in self.effects:
-                if self.effects['Регенерация']:
-                    percent = self.hp / self.max_hp
-                    if 0.9 <= percent < 1:
-                        self.hp += self.max_hp * 0.02
-                    if 0.7 <= percent < 0.9:
-                        self.hp += self.max_hp * 0.04
-                    if 0.5 <= percent < 0.7:
-                        self.hp += self.max_hp * 0.06
-                    if 0.3 <= percent < 0.5:
-                        self.hp += self.max_hp * 0.08
-                    if percent < 0.3:
-                        self.hp += self.max_hp * 0.1
-                    self.hp = round(self.hp)
-                    print(self.name, 'восстановил часть здоровья')
-                    self.effects['Регенерация'] = False
                 if 'Заживление' in self.effects:
                     if self.effects['Заживление']:
                         if self.hp < self.max_hp:
@@ -1145,6 +1113,25 @@ def select_skill(enemy):
 
 
 def enemy_effects(enemy):
+    if 'Регенерация' in enemy.effects:
+        percent = enemy.hp / enemy.max_hp
+        if 0.9 <= percent < 1:
+            enemy.hp += enemy.max_hp * 0.02
+        if 0.7 <= percent < 0.9:
+            enemy.hp += enemy.max_hp * 0.04
+        if 0.5 <= percent < 0.7:
+            enemy.hp += enemy.max_hp * 0.06
+        if 0.3 <= percent < 0.5:
+            enemy.hp += enemy.max_hp * 0.08
+        if percent < 0.3:
+            enemy.hp += enemy.max_hp * 0.1
+        enemy.hp = round(enemy.hp)
+        print(enemy.name, 'восстановил часть здоровья')
+    if 'Заживление' in enemy.effects:
+        enemy.effects['Заживление'] = True
+
+
+def debuff(enemy):
     if 'Гипоцентр' in enemy.effects:
         dmg = enemy.take_mag_attack(50)
         dmg = round(dmg)
@@ -1161,10 +1148,7 @@ def enemy_effects(enemy):
         dmg = enemy.take_mag_attack(person.agility * 0.75)
         dmg = round(dmg)
         print('Поджиг нанёс {0} урона'.format(dmg))
-    if 'Регенерация' in enemy.effects:
-        enemy.effects['Регенерация'] = True
-    if 'Заживление' in enemy.effects:
-        enemy.effects['Заживление'] = True
+
 
 def battle(enemy):
     count = 1
@@ -1202,7 +1186,7 @@ def battle(enemy):
                     continue
         skill.condensate()
         skill.sea_snakes(enemy)
-        enemy_effects(enemy)
+        debuff(enemy)
         if enemy.hp <= 0:
             if 'Каменная кожа. 1ур' in person.effects:
                 del person.effects['Каменная кожа. 1ур']
@@ -1224,6 +1208,7 @@ def battle(enemy):
                 person.shield = 0
             print('\nВы победили!\n')
             continue
+        enemy_effects(enemy)
         dmg = person.take_attack(enemy, enemy.dmg)
         if dmg:
             print('Вы получили {0} урона'.format(dmg))
