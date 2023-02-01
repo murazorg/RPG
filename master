@@ -12,7 +12,7 @@ class Character:
         self.hp = 100
         self.max_hp = 100
         self.shield = 0
-        self.dmg = 40
+        self.dmg = 30
         self.mp = 50
         self.max_mp = 50
         self.amp_mag_dmg = 0
@@ -154,7 +154,7 @@ class Character:
                 self.amp_mag_dmg += 0.5 * value
 
     def calculate_max_hp(self):
-        self.max_hp = 100
+        self.max_hp = 120
         self.max_hp += self.strength * 10
         return self.max_hp
 
@@ -182,7 +182,7 @@ class Character:
             self.menu()
 
     def lvl_up(self):
-        increase = 5
+        increase = 10
         print('Какой атрибут вы желаете увеличить на {0} единиц?'.format(increase))
         print('                              1    Силу')
         print('                              2    Ловкость')
@@ -1212,6 +1212,7 @@ def battle(enemy):
                 [None], [None], [None], [2, 5], [3, 5], [4, 5], [5, 5]
             ]
         check(person.duration, enemy)
+        sleep(1)
         person.battle_info()
         enemy.battle_info()
         while True:
@@ -1260,7 +1261,6 @@ def battle(enemy):
             continue
         sleep(1)
         enemy_effects(enemy)
-        sleep(1)
         dmg = person.take_attack(enemy, enemy.dmg)
         if dmg:
             print('Вы получили {0} урона'.format(dmg))
@@ -1287,7 +1287,7 @@ def scenario_1():
         sleep(1)
         print('.')
     print('Выйдя на охоту за дичью, вы так ничего и не смогли найти, однако вместо дичи...\n')
-    sleep(3)
+    sleep(5)
     # Здесь должна быть функция случайного слабого врага. Пока просто гоблин
     print('Вы встретили Гоблина!')
     enemy = Enemy('Гоблин')
@@ -1321,11 +1321,13 @@ def scenario_2():
         i += 1
         sleep(1)
         print('.')
-    print('После ещё нескольких часов поиска вы насткнулись на Энта!\n')
+    print('После ещё нескольких часов поиска вы наткнулись на Энта!\n')
+    sleep(2)
     enemy = Enemy('Малый энт')
     enemy.all_info()
     battle(enemy)
     print('Совершив решающий удар по, и без того, слабому противнику, из кустов вышел ещё один Энт!')
+    sleep(1)
     enemy = Enemy('Малый энт')
     enemy.all_info()
     battle(enemy)
@@ -1358,11 +1360,12 @@ def scenario_3():
     print("Тихонько зайдя в пещеру и услышав голоса, вы прислушались")
     input()
     print("В старых песнях поётся: орков создали, чтобы бить демонов!")
-    sleep(1)
-    print("Старые песни правильные – демоны зло!")
-    sleep(1)
+    sleep(3)
+    print("Старые песни правильные – демоны зло! - прозвучал более глупый голос")
+    sleep(3)
     print('Решив подсмотреть, вы невольно задели старую опору, и она с грохотом обрушилась, \n'
           'оставив вас лежать перед Орком и Огром')
+    sleep(4)
     enemy = Enemy('Орк')
     enemy.all_info()
     battle(enemy)
@@ -1395,7 +1398,7 @@ def scenario_4():
         sleep(1)
         print('.')
     print("На достаточной глубине оказалось большое подземное озеро, домик и большие ворота в скалу")
-    sleep(1)
+    sleep(3)
     print("Возле ворот стояло два Орка. Заприметив вас, они вступили в бой")
     enemy = Enemy('Орк')
     enemy.all_info()
