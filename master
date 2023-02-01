@@ -1340,7 +1340,7 @@ def scenario_2():
         i += 1
         sleep(1)
         print('.', end='')
-    person.points += 2
+    person.points += 3
     # Здесь должна быть функция хаба
     person.menu()
 
