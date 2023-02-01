@@ -21,10 +21,12 @@ class Character:
         self.lvl = 1
         self.points = 8
         self.name_list = [False, False, False, False, False, False, False, False, False, False,
-                          False, False, False, False, False, False, False]
+                          False, False, False, False, False, False, False,
+                          False, False, False]
         self.effects = {}
         self.duration = [False, False, False, False, False, False, False, False, False, False,
-                         False, False, False, False, False, False, False]
+                         False, False, False, False, False, False, False,
+                         False, False, False]
 
     def menu(self):
         a = False
@@ -80,6 +82,10 @@ class Character:
                 break
         if self.name_list[16]:
             a.append(self.name_list[16])
+        for item in reversed(self.name_list[17:20]):
+            if item:
+                a.append(item)
+                break
         return a
 
     def print_effects(self):
@@ -318,6 +324,7 @@ class Enemy:
         if 'Крепкая кожа' in self.effects:
             attack - 10
             print('Крепкая кожа выдержала часть урона')
+        skill.fusion(self)
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact, 0)
         if self.hp > 0:
@@ -393,7 +400,8 @@ class Skill:
         self.time_list = \
             [
                 [3, 5], [4, 5], [5, 5], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
-                [7, 3], [7, 3], [7, 3], [None], [None], [None], [None]
+                [7, 3], [7, 3], [7, 3], [None], [None], [None], [None],
+                [None], [None], [None]
             ]
         self.cost = 0
 
@@ -419,6 +427,9 @@ class Skill:
         false_count = person.name_list[10:16].count(False)
         if false_count > 0 and person.name_list[9]:
             print('2                 Аспект Воды')
+        false_count = person.name_list[17:20].count(False)
+        if false_count > 0 and person.name_list[9]:
+            print('3                 Аспект Огня')
         match input():
             case '1':
                 print('\nВыберете способность для изучения:')
@@ -445,11 +456,11 @@ class Skill:
                 false_count = person.name_list[6:9].count(False)
                 match false_count:
                     case 3:
-                        print('3 - Инерционное гашение. 1ур')
+                        print('3 - Инерционное гашение*. 1ур')
                     case 2:
-                        print('3 - Инерционное гашение. 2ур')
+                        print('3 - Инерционное гашение*. 2ур')
                     case 1:
-                        print('3 - Инерционное гашение. 3ур')
+                        print('3 - Инерционное гашение*. 3ур')
                     case 0:
                         pass
                 if (person.name_list[2] or person.name_list[5] or person.name_list[8]) and\
@@ -473,18 +484,33 @@ class Skill:
                 false_count = person.name_list[13:16].count(False)
                 match false_count:
                     case 3:
-                        print('2 - Конденсат. 1ур')
+                        print('2 - Конденсат*. 1ур')
                     case 2:
-                        print('2 - Конденсат. 2ур')
+                        print('2 - Конденсат*. 2ур')
                     case 1:
-                        print('2 - Конденсат. 3ур')
+                        print('2 - Конденсат*. 3ур')
                     case 0:
                         pass
                 if (person.name_list[12] or person.name_list[15]) and (person.name_list[16] is False):
-                    print('3 - Морские змеи')
+                    print('3 - Морские змеи*')
                 print('5 - ИНФО')
                 print('0 - Назад')
                 self.choose_skill('water')
+            case '3':
+                print('\nВыберете способность для изучения:')
+                false_count = person.name_list[17:20].count(False)
+                match false_count:
+                    case 3:
+                        print('1 - Плавление*. 1ур')
+                    case 2:
+                        print('1 - Плавление*. 2ур')
+                    case 1:
+                        print('1 - Плавление*. 3ур')
+                    case 0:
+                        pass
+                print('5 - ИНФО')
+                print('0 - Назад')
+                self.choose_skill('fire')
 
     def choose_skill(self, aspect):
         choice = input()
@@ -590,6 +616,28 @@ class Skill:
                             print('\nМорские змеи - вершина искусства аспекта Воды, проявляющая полноту манипуляции \n'
                                   'в призыве ручного морского змея. Хоть они и не сильны, но обладают разумом и \n'
                                   'набросятся на вас как только вы потеряете должную концентрацию')
+                        print('\nВведите что-нибудь для возврата...')
+                        input()
+                        self.new()
+                    case '0':
+                        self.new()
+            case 'fire':
+                match choice:
+                    case '1':
+                        false_count = person.name_list[17:20].count(False)
+                        match false_count:
+                            case 3:
+                                person.name_list[17] = 'Плавление. 1ур'
+                            case 2:
+                                person.name_list[18] = 'Плавление. 2ур'
+                            case 1:
+                                person.name_list[19] = 'Плавление. 3ур'
+                            case 0:
+                                pass
+                    case '5':
+                        print('\n Плавление - наполняет оружие термальной энергией, отчего оно начинает \n'
+                              'разрушать броню соперника с каждым последующим ударом. Говорят, именно с помощью этого\n'
+                              'заклинания Парлакс и расплавил Великие Врата крепости Дымогор')
                         print('\nВведите что-нибудь для возврата...')
                         input()
                         self.new()
@@ -828,6 +876,16 @@ class Skill:
             enemy.mag_resist -= 0.01
             print('Морские змеи нанесли {0} урона. {1} стал чувствительнее к мане'.format(dmg, enemy.name))
 
+    def fusion(self, enemy):
+        false_count = person.name_list[17:20].count(False)
+        match false_count:
+            case 2:
+                enemy.armor -= 0.5
+            case 1:
+                enemy.armor -= 1
+            case 0:
+                enemy.armor -= 1.5
+
     def disspell(self, person, enemy, skill_id):
         match skill_id:
             case 0:
@@ -889,6 +947,8 @@ def skill_number():
         print('1                 Аспект Земли')
     if person.name_list[10:13].count(False) < len(person.name_list[10:13]):
         print('2                 Аспект Воды')
+    if person.name_list[17:20].count(False) < len(person.name_list[17:20]):
+        print('3                 Аспект Огня')
     choice = input()
     match choice:
         case '1':
@@ -977,13 +1037,15 @@ def enemy_effects(enemy):
 def battle(enemy):
     count = 1
     person.duration = [False, False, False, False, False, False, False, False, False, False,
-                       False, False, False, False, False, False, False]
+                       False, False, False, False, False, False, False,
+                       False, False, False]
     pass
     while enemy.hp > 0 and person.hp > 0:
         skill.time_list = \
             [
                 [4, 6], [5, 6], [6, 6], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
-                [7, 3], [7, 3], [7, 3], [None], [None], [None], [None]
+                [7, 3], [7, 3], [7, 3], [None], [None], [None], [None],
+                [None], [None], [None]
             ]
         check(person.duration, enemy)
         person.battle_info()
