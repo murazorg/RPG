@@ -1,4 +1,4 @@
-class Artefact():
+class Artefact:
     artefacts = {'Гномий щит': ['Левая рука', False, False, None], 'Кулон смерти': ['Шея', False, False, None],
                  'Кулон жизни': ['Шея', False, False, None], 'Волшебная палочка': ['Правая рука', False, False, None],
                  'Кистень иглоспина': ['Правая рука', False, False, None], 'Шлем Хаоса': ['Голова', False, False, None],
