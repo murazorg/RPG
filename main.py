@@ -1,6 +1,6 @@
 from time import sleep
 from random import randint
-import artefacts as a
+from artefacts import Artefact
 
 
 class Character:
@@ -117,8 +117,8 @@ class Character:
         print('Броня:                       ', self.armor)
         print('Сопротивление магии:         ', round(self.mag_resist, 3) * 100, '%')
         print('Умения:                      ', self.print_skills())
-        print('Рюкзак:                       ', *art.not_equipment(), sep='')
-        print('Экипировано:                  ', *art.equipment(), sep='')
+        print('Рюкзак:                       [', *art.not_equipment(), ']', sep='')
+        print('Экипировано:                  [', *art.equipment(), ']', sep='')
         print('Экипировать/снять:                   1')
         print('LOGO:                                2')
         print('Назад:                               0')
@@ -127,7 +127,7 @@ class Character:
             case '1':
                 print('\nВведите номер предмета, который хотите экипировать...')
                 id = input()
-                art.wear(int(id))
+                art.wear(int(id), person)
                 self.all_info()
             case '2':
                 print(art.artefacts)
@@ -172,19 +172,9 @@ class Character:
                     self.mp = self.max_mp
                 self.amp_mag_dmg += 0.5 * value
 
-    def calculate_max_hp(self):
-        self.max_hp = 120
-        self.max_hp += self.strength * 10
-        return self.max_hp
-
-    def calculate_max_mp(self):
-        self.max_mp = 50
-        self.max_mp += self.intellect * 5
-        return self.max_mp
-
     def restoration(self):
-        self.hp = self.calculate_max_hp()
-        self.mp = self.calculate_max_mp()
+        self.hp = self.max_hp
+        self.mp = self.max_mp
 
     def chill(self):
         if self.hp == self.max_hp and self.mp == self.max_mp:
@@ -349,6 +339,10 @@ class Enemy:
         if 'Крепкая кожа' in self.effects:
             attack - 10
             print('Крепкая кожа выдержала часть урона')
+        if 'Кулон смерти' in person.effects:
+            if 'Кулон смерти' not in self.effects:
+                self.effects['Кулон смерти'] = True
+                self.armor -= 2
         skill.fusion(self)
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact)
@@ -1320,7 +1314,6 @@ def scenario_1():
         print('.', end='')
     person.points += 2
     print("Недалеко от хижины вы решили развесить на деревьях уши убитых гоблинов")
-    art.get_artefact('Гномий щит')
     # Здесь должна быть функция хаба
     person.menu()
 
@@ -1415,10 +1408,14 @@ def scenario_4():
     sleep(10)
     exit()
 
-art = a.Artefact()
+
+art = Artefact()
 enemy = Enemy('None')
 skill = Skill()
 person = Character()
+art.get_artefact('Гномий щит')
+art.get_artefact('Кулон смерти')
+art.get_artefact('Кулон жизни')
 person.menu()
 scenario_1()
 scenario_2()
