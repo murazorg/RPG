@@ -1,6 +1,8 @@
 class Artefact():
     artefacts = {'Гномий щит': ['Левая рука', False, False, None], 'Кулон смерти': ['Шея', False, False, None],
-                 'Кулон жизни': ['Шея', False, False, None]}
+                 'Кулон жизни': ['Шея', False, False, None], 'Волшебная палочка': ['Правая рука', False, False, None],
+                 'Кистень иглоспина': ['Правая рука', False, False, None], 'Шлем Хаоса': ['Голова', False, False, None],
+                 'Сандали святого': ['Ноги', False, False, None], 'Рёбра кентавра': ['Торс', False, False, None]}
     count = 0
 
     def get_artefact(self, name):
@@ -38,6 +40,28 @@ class Artefact():
             case 'Кулон жизни':
                 person.max_hp += 75
                 person.restoration()
+            case 'Волшебная палочка':
+                person.change_attribute('intellect', 3)
+                person.amp_mag_dmg += 5
+                person.restoration()
+            case 'Кистень иглоспина':
+                person.change_attribute('strength', 4)
+                person.dmg += 5
+                person.restoration()
+            case 'Шлем Хаоса':
+                person.armor += 3
+                person.change_attribute('intellect', 3)
+                person.amp_mag_dmg += 6
+                person.restoration()
+            case 'Сандали святого':
+                person.change_attribute('strength', 7)
+                person.change_attribute('agility', 7)
+                person.change_attribute('intellect', 7)
+                person.restoration()
+            case 'Рёбра кентавра':
+                person.armor += 2
+                person.change_attribute('strength', 2)
+                person.restoration()
 
     def effect_off(self, name, person):
         match name:
@@ -47,6 +71,28 @@ class Artefact():
                 del person.effects['Кулон смерти']
             case 'Кулон жизни':
                 person.max_hp -= 75
+                person.restoration()
+            case 'Волшебная палочка':
+                person.change_attribute('intellect', -3)
+                person.amp_mag_dmg -= 5
+                person.restoration()
+            case 'Кистень иглоспина':
+                person.change_attribute('strength', -4)
+                person.dmg -= 5
+                person.restoration()
+            case 'Шлем Хаоса':
+                person.armor -= 3
+                person.change_attribute('intellect', -3)
+                person.amp_mag_dmg -= 6
+                person.restoration()
+            case 'Сандали святого':
+                person.change_attribute('strength', -7)
+                person.change_attribute('agility', -7)
+                person.change_attribute('intellect', -7)
+                person.restoration()
+            case 'Рёбра кентавра':
+                person.armor -= 2
+                person.change_attribute('strength', -2)
                 person.restoration()
 
     def not_equipment(self):
@@ -58,7 +104,7 @@ class Artefact():
                 a.append(key)
                 a.append(':')
                 a.append(value[0])
-                a.append(' ')
+                a.append('    ')
         if a:
             return a
         else:
@@ -73,7 +119,7 @@ class Artefact():
                 a.append(key)
                 a.append(':')
                 a.append(value[0])
-                a.append(' ')
+                a.append('    ')
         if a:
             return a
         else:
