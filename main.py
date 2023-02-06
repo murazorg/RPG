@@ -20,7 +20,7 @@ class Character:
         self.armor = 0
         self.mag_resist = 0.1
         self.lvl = 1
-        self.points = 1
+        self.points = 4
         self.name_list = [False, False, False, False, False, False, False, False, False, False,
                           False, False, False, False, False, False, False,
                           False, False, False, False, False, False, False]
@@ -318,7 +318,7 @@ class Enemy:
                 self.hp = 460
                 self.dmg = 56
                 self.mp = 0
-                self.armor = 14
+                self.armor = 15
                 self.mag_resist = 0.3
                 self.effects = {'Ярость': False, 'Крепкая кожа': True}
             case 'Малый энт':
@@ -326,7 +326,7 @@ class Enemy:
                 self.max_hp = 90
                 self.dmg = 6
                 self.mp = 0
-                self.armor = 3
+                self.armor = 4
                 self.mag_resist = 0.1
                 self.effects = {'Заживление': True}
             case 'Гигантский паук':
@@ -340,7 +340,7 @@ class Enemy:
                 self.hp = 200
                 self.dmg = 12
                 self.mp = 200
-                self.armor = 4
+                self.armor = 6
                 self.mag_resist = 0.25
                 self.effects = {'Порождение магии': True, 'Ослепление': True,
                                 'Восстановление': True, 'Движение маны': True}
@@ -348,7 +348,7 @@ class Enemy:
                 self.hp = 330
                 self.dmg = 20
                 self.mp = 0
-                self.armor = 8
+                self.armor = 12
                 self.mag_resist = 0.1
                 self.effects = {'Глубокие раны': True, 'Обновление': 3}
 
@@ -553,8 +553,7 @@ class Skill:
                         print('3 - Инерционное гашение*. 3ур')
                     case 0:
                         pass
-                if (person.name_list[2] or person.name_list[5] or person.name_list[8]) and\
-                        (person.name_list[9] is False):
+                if (person.name_list[0:9].count(False) <= 6) and (person.name_list[9] is False):
                     print('4 - !Гипоцентр')
                 print('5 - ИНФО')
                 print('0 - Назад')
@@ -581,7 +580,7 @@ class Skill:
                         print('2 - Конденсат*. 3ур')
                     case 0:
                         pass
-                if (person.name_list[12] or person.name_list[15]) and (person.name_list[16] is False):
+                if (person.name_list[10:16].count(False) <= 3) and (person.name_list[16] is False):
                     print('3 - !Морские змеи*')
                 print('5 - ИНФО')
                 print('0 - Назад')
@@ -608,7 +607,7 @@ class Skill:
                         print('2 - Поджиг. 3ур')
                     case 0:
                         pass
-                if (person.name_list[19] or person.name_list[22]) and (person.name_list[23] is False):
+                if (person.name_list[17:23].count(False) <= 3) and (person.name_list[23] is False):
                     print('3 - !Огненный Аркан')
                 print('5 - ИНФО')
                 print('0 - Назад')
@@ -1525,7 +1524,7 @@ def scenario_4():
         print('.', end='')
     print("Окончив все свои опасные путешествия, вы устроили большой ужин из печени Циклопа.\n"
           "Кто же знал, что обычная охота может обернуться в такой подвиг! Это славная история")
-    sleep(10)
+    sleep(7)
     exit()
 
 
