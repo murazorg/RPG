@@ -1,8 +1,10 @@
 class Artefact:
     artefacts = {'Гномий щит': ['Левая рука', False, False, None], 'Кулон смерти': ['Шея', False, False, None],
-                 'Кулон жизни': ['Шея', False, False, None], 'Волшебная палочка': ['Правая рука', False, False, None],
-                 'Кистень иглоспина': ['Правая рука', False, False, None], 'Шлем Хаоса': ['Голова', False, False, None],
-                 'Сандали святого': ['Ноги', False, False, None], 'Рёбра кентавра': ['Торс', False, False, None]}
+     'Кулон жизни': ['Шея', False, False, None], 'Волшебная палочка': ['Правая рука', False, False, None],
+     'Кистень иглоспина': ['Правая рука', False, False, None], 'Шлем Хаоса': ['Голова', False, False, None],
+     'Сандали святого': ['Ноги', False, False, None], 'Рёбра кентавра': ['Торс', False, False, None],
+     'Шкура зверя': ['Накидка', False, False, None], 'Кольцо жизненной силы': ['Кольцо', False, False, None]}
+
     count = 0
 
     def get_artefact(self, name):
@@ -62,6 +64,13 @@ class Artefact:
                 person.armor += 2
                 person.change_attribute('strength', 2)
                 person.restoration()
+            case 'Шкура зверя':
+                person.mag_resist += 0.1
+                person.armor += 3
+            case 'Кольцо жизненной силы':
+                person.effects['Кольцо жизненной силы'] = True
+                person.change_attribute('strength', 5)
+                person.restoration()
 
     def effect_off(self, name, person):
         match name:
@@ -94,6 +103,13 @@ class Artefact:
                 person.armor -= 2
                 person.change_attribute('strength', -2)
                 person.restoration()
+            case 'Шкура зверя':
+                person.mag_resist -= 0.1
+                person.armor -= 3
+            case 'Кольцо жизненной силы':
+                del person.effects['Кольцо жизненной силы']
+                person.change_attribute('strength', -5)
+                person.restoration()
 
     def not_equipment(self):
         a = []
@@ -124,4 +140,3 @@ class Artefact:
             return a
         else:
             return "Ничего не экипировано"
-
