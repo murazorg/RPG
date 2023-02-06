@@ -254,6 +254,12 @@ class Character:
                 self.effects['Яд гигантского паука'] = True
             else:
                 print('Яд нанёс', self.take_mag_attack(10), 'урона')
+        if 'Глубокие раны' in enemy.effects:
+            if 'Глубокие раны' in person.effects:
+                person.effects['Глубокие раны'] += 6
+            else:
+                person.effects['Глубокие раны'] = 6
+            attack += person.effects['Глубокие раны']
         attack -= skill.inertial_damping(attack)  # Attack reduced block
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact)
@@ -338,6 +344,13 @@ class Enemy:
                 self.mag_resist = 0.25
                 self.effects = {'Порождение магии': True, 'Ослепление': True,
                                 'Восстановление': True, 'Движение маны': True}
+            case 'Беорн':
+                self.hp = 330
+                self.dmg = 20
+                self.mp = 0
+                self.armor = 8
+                self.mag_resist = 0.1
+                self.effects = {'Глубокие раны': True, 'Обновление': 3}
 
     def enemy_move(self):
         match self.name:
@@ -371,6 +384,28 @@ class Enemy:
                 dmg = person.take_attack(self, self.dmg)
                 if dmg: print('Вы получили {0} урона'.format(dmg))
                 return True
+            case 'Беорн':
+                if self.hp <= 300 and self.effects['Обновление'] == 3:
+                    self.dispelling()
+                    self.effects['Обновление'] -= 1
+                if self.hp <= 200 and self.effects['Обновление'] == 2:
+                    self.dispelling()
+                    self.effects['Обновление'] -= 1
+                if self.hp <= 100 and self.effects['Обновление'] == 1:
+                    self.dispelling()
+                    self.effects['Обновление'] -= 1
+                dmg = person.take_attack(self, self.dmg)
+                if dmg: print('Вы получили {0} урона'.format(dmg))
+                return True
+
+    def dispelling(self):
+        if 'Поджиг. 1ур' in enemy.effects:
+            del enemy.effects['Поджиг. 1ур']
+        if 'Поджиг. 2ур' in enemy.effects:
+            del enemy.effects['Поджиг. 2ур']
+        if 'Поджиг. 3ур' in enemy.effects:
+            del enemy.effects['Поджиг. 3ур']
+        print(self.name, 'развеял все отрицательные эффекты')
 
 
     def print_effects(self):
@@ -1351,6 +1386,8 @@ def battle(enemy):
                 del person.effects['Ослепление']
             if 'Яд гигантского паука' in person.effects:
                 del person.effects['Яд гигантского паука']
+            if 'Глубокие раны' in person.effects:
+                del person.effects['Глубокие раны']
             print('\nВы победили!\n')
             continue
         sleep(1)
@@ -1369,7 +1406,7 @@ def battle(enemy):
 def scenario_1():
     print("В диких лесах...")
     sleep(1)
-    enemy = Enemy('Гигантский паук')
+    enemy = Enemy('Беорн')
     enemy.all_info()
     battle(enemy)
     enemy = Enemy('Сатир')
