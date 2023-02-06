@@ -114,8 +114,8 @@ class Character:
         print('Урон:                        ', self.dmg)
         print('Мана:                        ', self.mp)
         print('Колдовство:                  ', self.amp_mag_dmg, '%')
-        print('Броня:                       ', self.armor)
-        print('Сопротивление магии:         ', round(self.mag_resist, 3) * 100, '%')
+        print('Броня:                       ', round(self.armor))
+        print('Сопротивление магии:         ', round(self.mag_resist * 100), '%')
         print('Умения:                      ', self.print_skills())
         print('Рюкзак:                       [', *art.not_equipment(), ']', sep='')
         print('Экипировано:                  [', *art.equipment(), ']', sep='')
@@ -143,7 +143,7 @@ class Character:
         print('\nИмя:', self.name)
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
-        print('Броня:                       ', self.armor, '({0}%)'.format(self.armor_impact() * 100))
+        print('Броня:                       ', round(self.armor), '({0}%)'.format(round(self.armor_impact() * 100)))
         if self.shield > 0:
             print('Щит:                         ', self.shield)
         print('Активные эффекты:            ', self.print_effects(), '\n')
@@ -175,6 +175,15 @@ class Character:
     def restoration(self):
         self.hp = self.max_hp
         self.mp = self.max_mp
+
+    def heal(self, value):
+        if self.hp < self.max_hp:
+            heal = value * (1 + (self.amp_mag_dmg / 100))
+            self.hp += round(heal)
+            if self.hp > self.max_hp:
+                self.hp = self.max_hp
+            return heal
+        return 0
 
     def chill(self):
         if self.hp == self.max_hp and self.mp == self.max_mp:
@@ -234,11 +243,17 @@ class Character:
     def take_attack(self, enemy, attack):
         if 'Гипоцентр' in enemy.effects:
             if randint(0, 100) <= 25:
+                print('Противник промахнулся')
                 return False
         if 'Гнев орка' in enemy.effects:
             if randint(0, 100) <= 20:
                 attack = attack * 1.5
                 print(enemy.name, 'совершил критическую атаку!')
+        if 'Ядовитые жвалы' in enemy.effects:
+            if 'Яд гигантского паука' not in self.effects:
+                self.effects['Яд гигантского паука'] = True
+            else:
+                print('Яд нанёс', self.take_mag_attack(10), 'урона')
         attack -= skill.inertial_damping(attack)  # Attack reduced block
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact)
@@ -273,7 +288,7 @@ class Enemy:
         match self.name:
             case 'Гоблин':
                 self.hp = 70
-                self.dmg = 8
+                self.dmg = 18
                 self.mp = 0
                 self.armor = 2
                 self.mag_resist = 0.1
@@ -308,6 +323,55 @@ class Enemy:
                 self.armor = 3
                 self.mag_resist = 0.1
                 self.effects = {'Заживление': True}
+            case 'Гигантский паук':
+                self.hp = 110
+                self.dmg = 8
+                self.mp = 0
+                self.armor = 4
+                self.mag_resist = 0.1
+                self.effects = {'Ядовитые жвалы': True}
+            case 'Сатир':
+                self.hp = 200
+                self.dmg = 12
+                self.mp = 200
+                self.armor = 4
+                self.mag_resist = 0.25
+                self.effects = {'Порождение магии': True, 'Ослепление': True,
+                                'Восстановление': True, 'Движение маны': True}
+
+    def enemy_move(self):
+        match self.name:
+            case 'Гоблин' | 'Орк' | 'Огр' | 'Циклоп' | 'Малый энт' | 'Гигантский паук':
+                dmg = person.take_attack(self, self.dmg)
+                if dmg: print('Вы получили {0} урона'.format(dmg))
+                return True
+            case 'Сатир':
+                if self.effects['Ослепление']:
+                    person.effects['Ослепление'] = True
+                    print('Вы ослеплены!')
+                    self.effects['Ослепление'] = False
+                    self.mp -= 30
+                    return True
+                if self.hp <= 80 and self.effects['Восстановление'] and self.mp >= 50:
+                    self.hp += 100
+                    self.mp -= 50
+                    print('Сатир применил шаманскую магию и исцелил себя')
+                    self.effects['Восстановление'] = False
+                    return True
+                if self.mp >= 20:
+                    self.mp -= 20
+                    if 'Движение маны' in person.effects:
+                        person.effects['Движение маны'] += 2
+                    else:
+                        person.effects['Движение маны'] = 2
+                    person.take_mag_attack(person.effects['Движение маны'])
+                    person.mp -= person.effects['Движение маны']
+                    print('Сатир расшатал внутренние потоки и выжег', person.effects['Движение маны'], 'здоровья и маны')
+                    return True
+                dmg = person.take_attack(self, self.dmg)
+                if dmg: print('Вы получили {0} урона'.format(dmg))
+                return True
+
 
     def print_effects(self):
         a = []
@@ -322,13 +386,13 @@ class Enemy:
         print('Урон:                        ', self.dmg)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
-        print('Сопротивление магии:         ', self.mag_resist * 100, '%')
+        print('Сопротивление магии:         ', round(self.mag_resist * 100), '%')
 
     def battle_info(self):
         print(self.name)
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
-        print('Броня:                       ', self.armor, '({0}%)'.format(self.armor_impact() * 100))
+        print('Броня:                       ', round(self.armor), '({0}%)'.format(round(self.armor_impact() * 100)))
         print('Активные эффекты:            ', self.print_effects())
 
     def armor_impact(self):
@@ -336,6 +400,10 @@ class Enemy:
         return round(damage_reduction, 2)
 
     def take_attack(self, attack):
+        if 'Ослепление' in person.effects:
+            if randint(0, 100) <= 25:
+                print('Критический промах!')
+                return False
         if 'Крепкая кожа' in self.effects:
             attack - 10
             print('Крепкая кожа выдержала часть урона')
@@ -899,7 +967,7 @@ class Skill:
                     print('Вы сконденсировали {0} маны'.format(condensate))
             case 1:
                 if person.mp < person.max_mp:
-                    condensate = person.max_mp * 0.1
+                    condensate = person.max_mp * 0.075
                     if condensate > 100:
                         condensate = 100
                     person.mp += condensate
@@ -908,7 +976,7 @@ class Skill:
                     print('Вы сконденсировали {0} маны'.format(condensate))
             case 0:
                 if person.mp < person.max_mp:
-                    condensate = person.max_mp * 0.15
+                    condensate = person.max_mp * 0.1
                     if condensate > 100:
                         condensate = 100
                     person.mp += condensate
@@ -1211,6 +1279,13 @@ def debuff(enemy):
         dmg = round(dmg)
         print('Поджиг нанёс {0} урона'.format(dmg))
 
+def person_effects(enemy):
+    if 'Кольцо жизненной силы' in person.effects:
+        print('Кольцо жизненной силы восстановило', round(person.heal(5)), 'здоровья')
+    skill.condensate()
+    skill.sea_snakes(enemy)
+
+
 
 def battle(enemy):
     count = 1
@@ -1237,7 +1312,8 @@ def battle(enemy):
             match choose:
                 case '1':
                     person_move = enemy.take_attack(person.dmg)
-                    print(enemy.name, 'получил', person_move, 'урона')
+                    if person_move:
+                        print(enemy.name, 'получил', person_move, 'урона')
                     break
                 case '2':
                     if select_skill(enemy):
@@ -1247,8 +1323,7 @@ def battle(enemy):
                 case _:
                     continue
         sleep(1)
-        skill.condensate()
-        skill.sea_snakes(enemy)
+        person_effects(enemy)
         sleep(1)
         debuff(enemy)
         if enemy.hp <= 0:
@@ -1270,15 +1345,17 @@ def battle(enemy):
             if 'Водный щит. 3ур' in person.effects:
                 del person.effects['Водный щит. 3ур']
                 person.shield = 0
+            if 'Движение маны' in person.effects:
+                del person.effects['Движение маны']
+            if 'Ослепление' in person.effects:
+                del person.effects['Ослепление']
+            if 'Яд гигантского паука' in person.effects:
+                del person.effects['Яд гигантского паука']
             print('\nВы победили!\n')
             continue
         sleep(1)
         enemy_effects(enemy)
-        dmg = person.take_attack(enemy, enemy.dmg)
-        if dmg:
-            print('Вы получили {0} урона'.format(dmg))
-        elif dmg is False:
-            print('Противник промахнулся')
+        enemy.enemy_move()
         count += 1
         # if len(person.duration) > 0:  # Для откладки duration
         #     print(person.duration)
@@ -1292,6 +1369,12 @@ def battle(enemy):
 def scenario_1():
     print("В диких лесах...")
     sleep(1)
+    enemy = Enemy('Гигантский паук')
+    enemy.all_info()
+    battle(enemy)
+    enemy = Enemy('Сатир')
+    enemy.all_info()
+    battle(enemy)
     print("Вы, как обычно, варили похлёбку из оленины. \n"
           "Однако, когда пришло время закидывать мясо, вы заметили что его нет! Вы решили исправить эту проблему")
     input()
@@ -1417,6 +1500,7 @@ art.get_artefact('Шлем Хаоса')
 art.get_artefact('Сандали святого')
 art.get_artefact('Кулон жизни')
 art.get_artefact('Волшебная палочка')
+art.get_artefact('Кольцо жизненной силы')
 person.menu()
 scenario_1()
 scenario_2()
