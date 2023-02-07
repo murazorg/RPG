@@ -30,7 +30,6 @@ class Character:
                          False, False, False, False, False, False, False]
 
     def menu(self):
-        art.update()
         a = False
         print('')
         print('МЕНЮ')
@@ -174,6 +173,7 @@ class Character:
                 self.amp_mag_dmg += 0.5 * value
 
     def restoration(self):
+        art.update()
         self.hp = self.max_hp
         self.mp = self.max_mp
 
@@ -247,7 +247,7 @@ class Character:
                 print('Противник промахнулся')
                 return False
         if 'Мираж' in self.effects:
-            if randint(0, 100) <= 50:
+            if randint(0, 100) <= 30:
                 print('Противник попал по иллюзии и та растворилась')
                 del self.effects['Мираж']
                 return False
@@ -273,7 +273,7 @@ class Character:
 
     def take_mag_attack(self, mag_attack):
         if 'Мираж' in self.effects:
-            if randint(0, 100) <= 50:
+            if randint(0, 100) <= 30:
                 print('Противник попал по иллюзии и та растворилась')
                 del self.effects['Мираж']
                 return False
@@ -293,7 +293,7 @@ class Character:
 
     def dispelling(self):
         if 'Мираж' in self.effects:
-            if randint(0, 100) <= 50:
+            if randint(0, 100) <= 30:
                 print('Противник попал по иллюзии и та растворилась')
                 del self.effects['Мираж']
                 return False
@@ -989,11 +989,11 @@ class Skill:
         false_count = person.name_list[6:9].count(False)
         match false_count:
             case 2:
-                if randint(0, 100) >= 50:
+                if randint(0, 100) <= 50:
                     block = 8
                     print('Слои песка заблокировали {0} урона'.format(block))
             case 1:
-                if randint(0, 100) >= 50:
+                if randint(0, 100) <= 50:
                     block = 16
                     if attack > block:
                         print('Слои песка заблокировали {0} урона'.format(block))
@@ -1001,7 +1001,7 @@ class Skill:
                         block = attack
                         print('Слои песка заблокировали все {0} урона'.format(block))
             case 0:
-                if randint(0, 100) >= 50:
+                if randint(0, 100) <= 50:
                     block = 24
                     if attack > block:
                         print('Слои песка заблокировали {0} урона'.format(block))
@@ -1418,6 +1418,11 @@ def battle(enemy):
             match choose:
                 case '1':
                     person_move = enemy.take_attack(person.dmg)
+                    if 'Мираж' in person.effects:
+                        print('Двойник атаковал')
+                        double_move = enemy.take_attack(person.agility / 2)
+                        if double_move:
+                            print('Двойник нанёс', double_move, 'урона')
                     if person_move:
                         print(enemy.name, 'получил', person_move, 'урона')
                     break
