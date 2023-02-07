@@ -30,6 +30,7 @@ class Character:
                          False, False, False, False, False, False, False]
 
     def menu(self):
+        art.update()
         a = False
         print('')
         print('МЕНЮ')
@@ -245,6 +246,11 @@ class Character:
             if randint(0, 100) <= 25:
                 print('Противник промахнулся')
                 return False
+        if 'Мираж' in self.effects:
+            if randint(0, 100) <= 50:
+                print('Противник попал по иллюзии и та растворилась')
+                del self.effects['Мираж']
+                return False
         if 'Гнев орка' in enemy.effects:
             if randint(0, 100) <= 20:
                 attack = attack * 1.5
@@ -266,6 +272,11 @@ class Character:
         return round(impact)
 
     def take_mag_attack(self, mag_attack):
+        if 'Мираж' in self.effects:
+            if randint(0, 100) <= 50:
+                print('Противник попал по иллюзии и та растворилась')
+                del self.effects['Мираж']
+                return False
         if self.shield > 0:
             dmg_on_shield = self.shield - mag_attack
             if dmg_on_shield <= 0:
@@ -281,6 +292,11 @@ class Character:
         return round(impact)
 
     def dispelling(self):
+        if 'Мираж' in self.effects:
+            if randint(0, 100) <= 50:
+                print('Противник попал по иллюзии и та растворилась')
+                del self.effects['Мираж']
+                return False
         if 'Каменная кожа. 1ур' in self.effects:
             del self.effects['Каменная кожа. 1ур']
             person.armor -= 4
@@ -1332,9 +1348,9 @@ def enemy_effects(enemy):
         enemy.hp = round(enemy.hp)
         print(enemy.name, 'восстановил часть здоровья')
     if 'Малое заживление' in enemy.effects:
-        if self.hp < self.max_hp:
-            self.hp += 5
-            print(self.name, 'восстановил часть здоровья')
+        if enemy.hp < enemy.max_hp:
+            enemy.hp += 5
+            print(enemy.name, 'восстановил часть здоровья')
     if 'Большое заживление' in enemy.effects:
         if enemy.hp < enemy.max_hp:
             enemy.hp += 12
@@ -1390,8 +1406,14 @@ def battle(enemy):
         while True:
             print('\nХод {0} как вы поступите?'.format(count))
             print('                              1    Атаковать')
+            print(art.artefact_skill)
             if person.name_list.count(False) < len(person.name_list):
                 print('                              2    Использовать способность')
+            number_true = 0
+            for x in art.artefact_skill:
+                number_true += art.artefact_skill[x].count(True)
+            if number_true > 0:
+                print('                              3    Использовать предмет')
             choose = input()
             match choose:
                 case '1':
@@ -1401,6 +1423,11 @@ def battle(enemy):
                     break
                 case '2':
                     if select_skill(enemy):
+                        break
+                    else:
+                        continue
+                case '3':
+                    if art.enter_artefact_skill(art.print_artefact_skill(), person):
                         break
                     else:
                         continue
@@ -1437,6 +1464,8 @@ def battle(enemy):
                 del person.effects['Яд гигантского паука']
             if 'Глубокие раны' in person.effects:
                 del person.effects['Глубокие раны']
+            if 'Мираж' in person.effects:
+                del person.effects['Мираж']
             print('\nВы победили!\n')
             continue
         sleep(1)
@@ -1455,12 +1484,12 @@ def battle(enemy):
 def scenario_1():
     print("В диких лесах...")
     sleep(1)
-    enemy = Enemy('Беорн')
-    enemy.all_info()
-    battle(enemy)
-    enemy = Enemy('Сатир')
-    enemy.all_info()
-    battle(enemy)
+    # enemy = Enemy('Беорн')
+    # enemy.all_info()
+    # battle(enemy)
+    # enemy = Enemy('Сатир')
+    # enemy.all_info()
+    # battle(enemy)
     print("Вы, как обычно, варили похлёбку из оленины. \n"
           "Однако, когда пришло время закидывать мясо, вы заметили что его нет! Вы решили исправить эту проблему")
     input()
@@ -1587,6 +1616,7 @@ art.get_artefact('Сандали святого')
 art.get_artefact('Кулон жизни')
 art.get_artefact('Волшебная палочка')
 art.get_artefact('Кольцо жизненной силы')
+art.get_artefact('Зеркальное копьё')
 person.menu()
 scenario_1()
 scenario_2()
