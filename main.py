@@ -1406,12 +1406,12 @@ def battle(enemy):
         while True:
             print('\nХод {0} как вы поступите?'.format(count))
             print('                              1    Атаковать')
-            print(art.artefact_skill)
             if person.name_list.count(False) < len(person.name_list):
                 print('                              2    Использовать способность')
+            # print(art.artefact_skill)  #  Для лого предметов
             number_true = 0
-            for x in art.artefact_skill:
-                number_true += art.artefact_skill[x].count(True)
+            for v in art.artefact_skill.values():
+                if v[0]: number_true += 1
             if number_true > 0:
                 print('                              3    Использовать предмет')
             choose = input()
@@ -1616,11 +1616,8 @@ art = Artefact()
 enemy = Enemy('None')
 skill = Skill()
 person = Character()
-art.get_artefact('Шлем Хаоса')
+art.get_artefact('Тиара душ')
 art.get_artefact('Сандали святого')
-art.get_artefact('Кулон жизни')
-art.get_artefact('Волшебная палочка')
-art.get_artefact('Кольцо жизненной силы')
 art.get_artefact('Зеркальное копьё')
 person.menu()
 scenario_1()
