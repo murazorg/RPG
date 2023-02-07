@@ -4,7 +4,8 @@ class Artefact:
      'Кистень иглоспина': ['Правая рука', False, False, None], 'Шлем Хаоса': ['Голова', False, False, None],
      'Сандали святого': ['Ноги', False, False, None], 'Рёбра кентавра': ['Торс', False, False, None],
      'Шкура зверя': ['Накидка', False, False, None], 'Кольцо жизненной силы': ['Кольцо', False, False, None],
-     'Зеркальное копьё': ['Левая рука', False, False, None]}  # Слот, Подобран, Одет, ID
+     'Зеркальное копьё': ['Левая рука', False, False, None], 'Тиара душ': ['Голова', False, False, None]
+                 }  # Слот, Подобран, Одет, ID
     artefact_skill = {}
     count = 0
 
@@ -51,9 +52,14 @@ class Artefact:
                         person.effects['Мираж'] = True
                         self.artefact_skill[k][0] = False
                         return True
-            else:
-                print('Неверный ввод')
-                return False
+                    case 'Жертва':
+                        print('Камень в центре тиары зловеще загорелся и поглотил ваши жизненные силы')
+                        person.mp += 50
+                        person.hp -= 100
+                        self.artefact_skill[k][0] = False
+                        return True
+        print('Неверный ввод')
+        return False
 
     def update(self):
         for k, v in self.artefact_skill.items():
@@ -101,6 +107,8 @@ class Artefact:
                 self.artefact_skill['Мираж'] = [True, self.artefacts['Зеркальное копьё'][3]]
                 person.change_attribute('agility', 22)
                 person.restoration()
+            case 'Тиара душ':
+                self.artefact_skill['Жертва'] = [True, self.artefacts['Тиара душ'][3]]
 
     def effect_off(self, name, person):
         match name:
@@ -144,6 +152,8 @@ class Artefact:
                 del self.artefact_skill['Мираж']
                 person.change_attribute('agility', -22)
                 person.restoration()
+            case 'Тиара душ':
+                del self.artefact_skill['Жертва']
 
     def not_equipment(self):
         a = []
