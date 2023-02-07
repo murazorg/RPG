@@ -3,8 +3,9 @@ class Artefact:
      'Кулон жизни': ['Шея', False, False, None], 'Волшебная палочка': ['Правая рука', False, False, None],
      'Кистень иглоспина': ['Правая рука', False, False, None], 'Шлем Хаоса': ['Голова', False, False, None],
      'Сандали святого': ['Ноги', False, False, None], 'Рёбра кентавра': ['Торс', False, False, None],
-     'Шкура зверя': ['Накидка', False, False, None], 'Кольцо жизненной силы': ['Кольцо', False, False, None]}
-
+     'Шкура зверя': ['Накидка', False, False, None], 'Кольцо жизненной силы': ['Кольцо', False, False, None],
+     'Зеркальное копьё': ['Левая рука', False, False, None]}  # Слот, Подобран, Одет, ID
+    artefact_skill = {}
     count = 0
 
     def get_artefact(self, name):
@@ -32,6 +33,31 @@ class Artefact:
         else:
             print('Такого предмета нет!')
             return True
+
+    def print_artefact_skill(self):
+        for k, v in self.artefact_skill.items():
+            if v[0]:
+                for key, value in self.artefacts.items():
+                    if v[1] == value[3]:
+                        print(v[1], key)
+        return input()
+
+    def enter_artefact_skill(self, input, person):
+        for k, v in self.artefact_skill.items():
+            if int(input) == v[1]:
+                match k:
+                    case 'Мираж':
+                        print('Вы мерцнули копьём и создали иллюзию-двойника')
+                        person.effects['Мираж'] = True
+                        self.artefact_skill[k][0] = False
+                        return True
+            else:
+                print('Неверный ввод')
+                return False
+
+    def update(self):
+        for k, v in self.artefact_skill.items():
+            v[0] = True
 
     def effect_on(self, name, person):
         match name:
@@ -71,6 +97,10 @@ class Artefact:
                 person.effects['Кольцо жизненной силы'] = True
                 person.change_attribute('strength', 5)
                 person.restoration()
+            case 'Зеркальное копьё':
+                self.artefact_skill['Мираж'] = [True, self.artefacts['Зеркальное копьё'][3]]
+                person.change_attribute('agility', 22)
+                person.restoration()
 
     def effect_off(self, name, person):
         match name:
@@ -109,6 +139,10 @@ class Artefact:
             case 'Кольцо жизненной силы':
                 del person.effects['Кольцо жизненной силы']
                 person.change_attribute('strength', -5)
+                person.restoration()
+            case 'Зеркальное копьё':
+                del self.artefact_skill['Мираж']
+                person.change_attribute('agility', -22)
                 person.restoration()
 
     def not_equipment(self):
