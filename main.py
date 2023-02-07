@@ -20,7 +20,7 @@ class Character:
         self.armor = 0
         self.mag_resist = 0.1
         self.lvl = 1
-        self.points = 4
+        self.points = 10
         self.name_list = [False, False, False, False, False, False, False, False, False, False,
                           False, False, False, False, False, False, False,
                           False, False, False, False, False, False, False]
@@ -280,6 +280,33 @@ class Character:
         self.hp -= round(impact)
         return round(impact)
 
+    def dispelling(self):
+        if 'Каменная кожа. 1ур' in self.effects:
+            del self.effects['Каменная кожа. 1ур']
+            person.armor -= 4
+            self.duration[0][0] = 0
+        if 'Каменная кожа. 2ур' in self.effects:
+            del self.effects['Каменная кожа. 2ур']
+            person.armor -= 8
+            self.duration[1][0] = 0
+        if 'Каменная кожа. 3ур' in self.effects:
+            del self.effects['Каменная кожа. 3ур']
+            person.armor -= 12
+            self.duration[2][0] = 0
+        if 'Водный щит. 1ур' in self.effects:
+            del self.effects['Водный щит. 1ур']
+            person.shield = 0
+            self.duration[10][0] = 0
+        if 'Водный щит. 2ур' in self.effects:
+            del self.effects['Водный щит. 2ур']
+            person.shield = 0
+            self.duration[11][0] = 0
+        if 'Водный щит. 3ур' in self.effects:
+            del self.effects['Водный щит. 3ур']
+            person.shield = 0
+            self.duration[12][0] = 0
+        print('Вам развеяли положительные эффекты')
+
 
 class Enemy:
     hp = 0
@@ -294,7 +321,7 @@ class Enemy:
         match self.name:
             case 'Гоблин':
                 self.hp = 70
-                self.dmg = 18
+                self.dmg = 8
                 self.mp = 0
                 self.armor = 2
                 self.mag_resist = 0.1
@@ -328,7 +355,7 @@ class Enemy:
                 self.mp = 0
                 self.armor = 4
                 self.mag_resist = 0.1
-                self.effects = {'Заживление': True}
+                self.effects = {'Малое заживление': True}
             case 'Гигантский паук':
                 self.hp = 110
                 self.dmg = 8
@@ -351,6 +378,14 @@ class Enemy:
                 self.armor = 12
                 self.mag_resist = 0.1
                 self.effects = {'Глубокие раны': True, 'Обновление': 3}
+            case 'Большой энт':
+                self.hp = 500
+                self.max_hp = 500
+                self.dmg = 70
+                self.mp = 120
+                self.armor = 16
+                self.mag_resist = 0.1
+                self.effects = {'Большое заживление': True, 'Шипы': True, 'Цветение': True, 'Развеивание': True}
 
     def enemy_move(self):
         match self.name:
@@ -397,16 +432,33 @@ class Enemy:
                 dmg = person.take_attack(self, self.dmg)
                 if dmg: print('Вы получили {0} урона'.format(dmg))
                 return True
+            case 'Большой энт':
+                if ('Каменная кожа. 1ур' or 'Каменная кожа. 2ур' or 'Каменная кожа. 3ур' or 'Водный щит. 1ур' or
+                        'Водный щит. 2ур' or 'Водный щит. 3ур') in person.effects and self.mp >= 30:
+                    self.mp -= 30
+                    print('FOUND!')
+                    person.dispelling()
+                    return True
+                if self.mp >= 30 and randint(0, 100) <= 33:
+                    self.mp -= 30
+                    print(self.name, 'попытался внедрить в вас побег и нанёс {0} урона'.format(person.take_mag_attack(50)))
+                    return True
+                else:
+                    dmg = person.take_attack(self, self.dmg)
+                    if dmg: print('Вы получили {0} урона'.format(dmg))
+                    return True
 
     def dispelling(self):
-        if 'Поджиг. 1ур' in enemy.effects:
-            del enemy.effects['Поджиг. 1ур']
-        if 'Поджиг. 2ур' in enemy.effects:
-            del enemy.effects['Поджиг. 2ур']
-        if 'Поджиг. 3ур' in enemy.effects:
-            del enemy.effects['Поджиг. 3ур']
-        print(self.name, 'развеял все отрицательные эффекты')
-
+        if 'Поджиг. 1ур' in self.effects:
+            del self.effects['Поджиг. 1ур']
+            person.duration[20][0] = 0
+        if 'Поджиг. 2ур' in self.effects:
+            del self.effects['Поджиг. 2ур']
+            person.duration[21][0] = 0
+        if 'Поджиг. 3ур' in self.effects:
+            del self.effects['Поджиг. 3ур']
+            person.duration[22][0] = 0
+        print(self.name, 'развеял отрицательные эффекты')
 
     def print_effects(self):
         a = []
@@ -446,6 +498,10 @@ class Enemy:
             if 'Кулон смерти' not in self.effects:
                 self.effects['Кулон смерти'] = True
                 self.armor -= 2
+        if 'Шипы' in self.effects:
+            dmg = person.take_attack(self, 10)
+            if dmg:
+                print('Шипы нанесли {0} урона'.format(dmg))
         skill.fusion(self)
         impact = attack - (attack * self.armor_impact())
         self.hp -= round(impact)
@@ -457,12 +513,6 @@ class Enemy:
                         print(self.name, 'вошёл в состояние ярости')
                         self.mag_resist += 0.2
                         self.dmg += 14
-            if 'Заживление' in self.effects:
-                if self.effects['Заживление']:
-                    if self.hp < self.max_hp:
-                        self.hp += 5
-                        print(self.name, 'восстановил часть здоровья')
-                        self.effects['Заживление'] = False
         return round(impact)
 
     def take_mag_attack(self, mag_attack: int):
@@ -476,12 +526,6 @@ class Enemy:
                         print(self.name, 'вошёл в состояние ярости')
                         self.mag_resist += 0.2
                         self.dmg += 14
-                if 'Заживление' in self.effects:
-                    if self.effects['Заживление']:
-                        if self.hp < self.max_hp:
-                            self.hp += 5
-                            print(self.name, 'восстановил часть здоровья')
-                            self.effects['Заживление'] = False
         return round(impact)
 
 
@@ -1287,8 +1331,14 @@ def enemy_effects(enemy):
             enemy.hp += enemy.max_hp * 0.1
         enemy.hp = round(enemy.hp)
         print(enemy.name, 'восстановил часть здоровья')
-    if 'Заживление' in enemy.effects:
-        enemy.effects['Заживление'] = True
+    if 'Малое заживление' in enemy.effects:
+        if self.hp < self.max_hp:
+            self.hp += 5
+            print(self.name, 'восстановил часть здоровья')
+    if 'Большое заживление' in enemy.effects:
+        if enemy.hp < enemy.max_hp:
+            enemy.hp += 12
+            print(enemy.name, 'восстановил часть здоровья')
 
 
 def debuff(enemy):
