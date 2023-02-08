@@ -1,6 +1,9 @@
 from time import sleep
 from random import randint
+
+import enemy_system
 from artefacts import Artefact
+from enemy_system import random_enemy
 
 
 class Character:
@@ -1487,22 +1490,28 @@ def battle(enemy):
 
 
 def scenario_1():
-    print("В диких лесах...")
-    sleep(1)
-    # enemy = Enemy('Беорн')
-    # enemy.all_info()
-    # battle(enemy)
-    # enemy = Enemy('Сатир')
-    # enemy.all_info()
-    # battle(enemy)
-    print("Вы, как обычно, варили похлёбку из оленины. \n"
-          "Однако, когда пришло время закидывать мясо, вы заметили что его нет! Вы решили исправить эту проблему")
-    input()
-    print('Выйдя на охоту за дичью, вы так ничего и не смогли найти, однако вместо дичи...\n')
-    input()
+    # print("В диких лесах...")
+    # sleep(1)
+    # print('Вы, как обычно, готовили жаркое из оленины.')
+    # input()
+    # print('Однако, когда пришло время закидывать мясо, вы заметили что его нет! Вы решили исправить эту проблему')
+    # input()
+    # print('Выйдя на охоту за дичью, вы так ничего и не смогли найти, однако вместо дичи...\n')
+    # input()
     # Здесь должна быть функция случайного слабого врага. Пока просто гоблин
-    print('Вы встретили Гоблина!')
-    enemy = Enemy('Гоблин')
+    x = enemy_system.random_enemy(person, 'easy')
+    print('Вам повстречался {0}!'.format(x))
+    enemy = Enemy(x)
+    enemy.all_info()
+    battle(enemy)
+    x = enemy_system.random_enemy(person, 'normal')
+    print('Вам повстречался {0}!'.format(x))
+    enemy = Enemy(x)
+    enemy.all_info()
+    battle(enemy)
+    x = enemy_system.random_enemy(person, 'hard')
+    print('Вам повстречался {0}!'.format(x))
+    enemy = Enemy(x)
     enemy.all_info()
     battle(enemy)
     # Здесь должна быть динамическая функция награды за противника
