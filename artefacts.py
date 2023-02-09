@@ -1,10 +1,20 @@
 class Artefact:
-    artefacts = {'Гномий щит': ['Левая рука', False, False, None], 'Кулон смерти': ['Шея', False, False, None],
-     'Кулон жизни': ['Шея', False, False, None], 'Волшебная палочка': ['Правая рука', False, False, None],
-     'Кистень иглоспина': ['Правая рука', False, False, None], 'Шлем Хаоса': ['Голова', False, False, None],
-     'Сандали святого': ['Ноги', False, False, None], 'Рёбра кентавра': ['Торс', False, False, None],
-     'Шкура зверя': ['Накидка', False, False, None], 'Кольцо жизненной силы': ['Кольцо', False, False, None],
-     'Зеркальное копьё': ['Левая рука', False, False, None], 'Тиара душ': ['Голова', False, False, None]
+    artefacts = {'Гномий щит': ['Левая рука', False, False, None],
+                 'Кулон смерти': ['Шея', False, False, None],
+                 'Кулон жизни': ['Шея', False, False, None],
+                 'Волшебная палочка': ['Правая рука', False, False, None],
+                 'Кистень иглоспина': ['Правая рука', False, False, None],
+                 'Шлем Хаоса': ['Голова', False, False, None],
+                 'Сандали святого': ['Ноги', False, False, None],
+                 'Рёбра кентавра': ['Торс', False, False, None],
+                 'Шкура зверя': ['Накидка', False, False, None],
+                 'Кольцо жизненной силы': ['Кольцо', False, False, None],
+                 'Зеркальное копьё': ['Левая рука', False, False, None],
+                 'Тиара душ': ['Голова', False, False, None],
+                 'Резец гоблина': ['Карман', False, False, None],
+                 'Капюшон расторопного вора': ['Голова', False, False, None],
+                 'Дубина огра': ['Правая рука', False, False, None],
+                 'Папаха победителя': ['Голова', False, False, None],
                  }  # Слот, Подобран, Одет, ID
     artefact_skill = {}
     count = 0
@@ -109,6 +119,17 @@ class Artefact:
                 person.restoration()
             case 'Тиара душ':
                 self.artefact_skill['Жертва'] = [True, self.artefacts['Тиара душ'][3]]
+            case 'Резец гоблина':
+                person.dmg += 3
+            case 'Капюшон расторопного вора':
+                person.change_attribute('agility', 2)
+                person.dmg += 4
+                person.restoration()
+            case 'Дубина огра':
+                person.dmg += 14
+            case 'Папаха победителя':
+                person.change_attribute('strength', 10)
+                person.restoration()
 
     def effect_off(self, name, person):
         match name:
@@ -154,6 +175,17 @@ class Artefact:
                 person.restoration()
             case 'Тиара душ':
                 del self.artefact_skill['Жертва']
+            case 'Резец гоблина':
+                person.dmg -= 3
+            case 'Капюшон расторопного вора':
+                person.change_attribute('agility', -2)
+                person.dmg -= 4
+                person.restoration()
+            case 'Дубина огра':
+                person.dmg -= 14
+            case 'Папаха победителя':
+                person.change_attribute('strength', -10)
+                person.restoration()
 
     def not_equipment(self):
         a = []
