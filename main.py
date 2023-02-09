@@ -14,7 +14,7 @@ class Character:
         self.hp = 100
         self.max_hp = 100
         self.shield = 0
-        self.dmg = 50
+        self.dmg = 200
         self.mp = 50
         self.max_mp = 50
         self.amp_mag_dmg = 0
@@ -50,6 +50,7 @@ class Character:
                 return True
             case '3':
                 self.arena()
+                self.menu()
             case '4':
                 self.chill()
             case '5':
@@ -226,42 +227,43 @@ class Character:
                 x = random_enemy(self, 'normal')
                 enemy = Enemy(x)
                 enemy.all_info()
-                battle(enemy)
+                if battle(enemy, True) is False: return False
                 print('Прикончив первого соперника, под возгласы публики, на арену вышел второй')
                 x = random_enemy(self, 'normal')
                 enemy = Enemy(x)
                 enemy.all_info()
-                battle(enemy)
+                if battle(enemy, True) is False: return False
                 print('Когда вы расправились со вторым, арена задрожала от множества криков. \n'
                       'Но было рано придаваться славе, перед вами был выпущен последний соперник')
                 x = random_enemy(self, 'hard')
                 enemy = Enemy(x)
                 enemy.all_info()
-                battle(enemy)
+                if battle(enemy, True) is False: return False
                 print('Все зрители были в восторге, а вы, окончив грандиозное представление и взяв награду, ушли домой...')
-                art.get_artefact('Папаха победителя')
-                self.menu()
+                if art.artefacts['Папаха победителя'][1] is False:
+                    art.get_artefact('Папаха победителя')
+                return True
             case '2':
                 print('Дождавшись своего часа, вы вышли на арену. На противоположной стороне вас поджидал')
                 x = random_enemy(self, 'easy')
                 enemy = Enemy(x)
                 enemy.all_info()
-                battle(enemy)
+                if battle(enemy, True) is False: return False
                 print('Прикончив первого соперника, на арену вышел второй')
                 x = random_enemy(self, 'easy')
                 enemy = Enemy(x)
                 enemy.all_info()
-                battle(enemy)
+                if battle(enemy, True) is False: return False
                 print('Когда вы расправились со вторым, перед вами был выпущен последний соперник')
                 x = random_enemy(self, 'normal')
                 enemy = Enemy(x)
                 enemy.all_info()
-                battle(enemy)
+                if battle(enemy, True) is False: return False
                 print('Под аплодисменты зрителей вы, окончив эту схватку победой, ушли домой...')
-                self.menu()
+                return True
             case _:
                 print('Неопознанная команда, возвращение в колизей...')
-                arena(person)
+                self.arena()
 
 
 
@@ -1486,7 +1488,7 @@ def other_buff(already_used):
 
 
 
-def battle(enemy):
+def battle(enemy, arena = False):
     already_used = False
     count = 1
     person.duration = [False, False, False, False, False, False, False, False, False, False,
@@ -1585,9 +1587,17 @@ def battle(enemy):
         #     print(person.duration)
         #     print(skill.time_list)
     if person.hp <= 0:
-        print('\nВы проиграли, игра окончена...')
-        sleep(5)
-        exit()
+        if arena:
+            print('\nВас избили до полусмерти, но милостивый распорядитель велел спасти вас. '
+                  'За такой позор вы потеряли часть опыта')
+            person.exp = 0
+            person.hp = 10
+            return False
+        else:
+            print('\nВы проиграли, игра окончена...')
+            sleep(5)
+            exit()
+    return True
 
 
 def scenario_1():
