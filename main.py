@@ -1,7 +1,5 @@
 from time import sleep
 from random import randint
-
-import enemy_system
 from artefacts import Artefact
 from enemy_system import random_enemy
 
@@ -39,10 +37,11 @@ class Character:
         print('МЕНЮ')
         print('Информация о персонаже:       1')
         print('Отправиться в путь:           2')
-        print('Отдохнуть:                    3')
+        print('Пойти в колизей:              3')
+        print('Отдохнуть:                    4')
         if self.points > 0:
             a = True
-            print('Поднять уровень:              4')
+            print('Поднять уровень:              5')
         choose = input()
         match choose:
             case '1':
@@ -50,8 +49,10 @@ class Character:
             case '2':
                 return True
             case '3':
-                self.chill()
+                self.arena()
             case '4':
+                self.chill()
+            case '5':
                 if a:
                     self.lvl_up()
                 else:
@@ -210,6 +211,56 @@ class Character:
         if self.exp >= exp_for_lvl:
             self.points += 1
             self.exp -= exp_for_lvl
+
+    def arena(self):
+        print('Вы пошли в местный колизей')
+        input()
+        print('Здешний распорядитель предложил вам два варианта:\n'
+              '1. Выйти первым номером и развеселить публику, став звездой этого дня\n'
+              '2. Выйти вторым номером и заполнить пустое время\n'
+              'Что выберете вы?')
+        choice = input()
+        match choice:
+            case '1':
+                print('Дождавшись своего часа, вы вышли на арену. На противоположной стороне вас поджидал')
+                x = random_enemy(self, 'normal')
+                enemy = Enemy(x)
+                enemy.all_info()
+                battle(enemy)
+                print('Прикончив первого соперника, под возгласы публики, на арену вышел второй')
+                x = random_enemy(self, 'normal')
+                enemy = Enemy(x)
+                enemy.all_info()
+                battle(enemy)
+                print('Когда вы расправились со вторым, арена задрожала от множества криков. \n'
+                      'Но было рано придаваться славе, перед вами был выпущен последний соперник')
+                x = random_enemy(self, 'hard')
+                enemy = Enemy(x)
+                enemy.all_info()
+                battle(enemy)
+                print('Все зрители были в восторге, а вы, окончив грандиозное представление, ушли домой...')
+                self.menu()
+            case '2':
+                print('Дождавшись своего часа, вы вышли на арену. На противоположной стороне вас поджидал')
+                x = random_enemy(self, 'easy')
+                enemy = Enemy(x)
+                enemy.all_info()
+                battle(enemy)
+                print('Прикончив первого соперника, на арену вышел второй')
+                x = random_enemy(self, 'easy')
+                enemy = Enemy(x)
+                enemy.all_info()
+                battle(enemy)
+                print('Когда вы расправились со вторым, перед вами был выпущен последний соперник')
+                x = random_enemy(self, 'normal')
+                enemy = Enemy(x)
+                enemy.all_info()
+                battle(enemy)
+                print('Под аплодисменты зрителей вы, окончив эту схватку победой, ушли домой...')
+                self.menu()
+            case _:
+                print('Неопознанная команда, возвращение в колизей...')
+                arena(person)
 
 
 
@@ -1464,9 +1515,9 @@ def battle(enemy):
                         continue
                 case _:
                     continue
-        sleep(1)
+        sleep(0.5)
         person_effects(enemy)
-        sleep(1)
+        sleep(0.5)
         debuff(enemy)
         if enemy.hp <= 0:
             person.give_exp(enemy.exp)
@@ -1500,7 +1551,7 @@ def battle(enemy):
                 del person.effects['Мираж']
             print('\nВы победили!\n')
             continue
-        sleep(1)
+        sleep(0.5)
         enemy_effects(enemy)
         enemy.enemy_move()
         count += 1
@@ -1514,32 +1565,20 @@ def battle(enemy):
 
 
 def scenario_1():
-    # print("В диких лесах...")
-    # sleep(1)
-    # print('Вы, как обычно, готовили жаркое из оленины.')
-    # input()
-    # print('Однако, когда пришло время закидывать мясо, вы заметили что его нет! Вы решили исправить эту проблему')
-    # input()
-    # print('Выйдя на охоту за дичью, вы так ничего и не смогли найти, однако вместо дичи...\n')
-    # input()
-    # Здесь должна быть функция случайного слабого врага. Пока просто гоблин
-    x = enemy_system.random_enemy(person, 'easy')
-    print('Вам повстречался {0}!'.format(x))
-    enemy = Enemy(x)
-    enemy.all_info()
-    battle(enemy)
-    x = enemy_system.random_enemy(person, 'normal')
-    print('Вам повстречался {0}!'.format(x))
-    enemy = Enemy(x)
-    enemy.all_info()
-    battle(enemy)
-    x = enemy_system.random_enemy(person, 'hard')
-    print('Вам повстречался {0}!'.format(x))
-    enemy = Enemy(x)
+    print("В диких лесах...")
+    sleep(1)
+    print('Вы, как обычно, готовили жаркое из оленины.')
+    input()
+    print('Однако, когда пришло время закидывать мясо, вы заметили что его нет! Вы решили исправить эту проблему')
+    input()
+    print('Выйдя на охоту за дичью, вы так ничего и не смогли найти, однако вместо дичи...\n')
+    input()
+    print('Вам повстречался Гоблин!')
+    enemy = Enemy('Гоблин')
     enemy.all_info()
     battle(enemy)
     # Здесь должна быть динамическая функция награды за противника
-    print('Да не одного!')
+    print('Да не один!')
     enemy = Enemy('Гоблин')
     enemy.all_info()
     battle(enemy)
