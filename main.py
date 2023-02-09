@@ -14,7 +14,7 @@ class Character:
         self.hp = 100
         self.max_hp = 100
         self.shield = 0
-        self.dmg = 200
+        self.dmg = 20
         self.mp = 50
         self.max_mp = 50
         self.amp_mag_dmg = 0
@@ -47,7 +47,13 @@ class Character:
             case '1':
                 self.all_info()
             case '2':
-                return True
+                print('Минимальный рекомендуемый уровень: {0}. Желаете отправиться в путь?'.format(advice))
+                print('Да:                           1')
+                print('Нет:                          0')
+                if input() == '1':
+                    return True
+                else:
+                    self.menu()
             case '3':
                 self.arena()
                 self.menu()
@@ -1590,6 +1596,36 @@ def battle(enemy, arena = False):
         if arena:
             print('\nВас избили до полусмерти, но милостивый распорядитель велел спасти вас. '
                   'За такой позор вы потеряли часть опыта')
+            if 'Каменная кожа. 1ур' in person.effects:
+                del person.effects['Каменная кожа. 1ур']
+                person.armor -= 4
+            if 'Каменная кожа. 2ур' in person.effects:
+                del person.effects['Каменная кожа. 2ур']
+                person.armor -= 8
+            if 'Каменная кожа. 3ур' in person.effects:
+                del person.effects['Каменная кожа. 3ур']
+                person.armor -= 12
+            if 'Водный щит. 1ур' in person.effects:
+                del person.effects['Водный щит. 1ур']
+                person.shield = 0
+            if 'Водный щит. 2ур' in person.effects:
+                del person.effects['Водный щит. 2ур']
+                person.shield = 0
+            if 'Водный щит. 3ур' in person.effects:
+                del person.effects['Водный щит. 3ур']
+                person.shield = 0
+            if 'Движение маны' in person.effects:
+                del person.effects['Движение маны']
+            if 'Ослепление' in person.effects:
+                del person.effects['Ослепление']
+            if 'Яд гигантского паука' in person.effects:
+                del person.effects['Яд гигантского паука']
+            if 'Глубокие раны' in person.effects:
+                del person.effects['Глубокие раны']
+            if 'Мираж' in person.effects:
+                del person.effects['Мираж']
+            if 'Воодушевление' in person.effects:
+                del person.effects['Воодушевление']
             person.exp = 0
             person.hp = 10
             return False
@@ -1629,7 +1665,7 @@ def scenario_1():
     print("Когда вы развешивали на деревьях уши убитых гоблинов, "
           "вам на глаза попался рваный капюшон, что свисал с одной из веток. Вы, недолго думая, прихватили и его")
     art.get_artefact('Капюшон расторопного вора')
-    # Здесь должна быть функция хаба
+    advice = 3
     person.menu()
 
 def scenario_2():
@@ -1661,7 +1697,7 @@ def scenario_2():
         i += 1
         sleep(1)
         print('.', end='')
-    # Здесь должна быть функция хаба
+    advice = 7
     person.menu()
 
 def scenario_3():
@@ -1693,7 +1729,7 @@ def scenario_3():
         sleep(1)
         print('.', end='')
     print("Засолив голову и подвесив её возле входа, вы сложили второй трофейный меч")
-    # Здесь должна быть функция хаба
+    advice = 9
     person.menu()
 
 def scenario_4():
@@ -1729,7 +1765,7 @@ def scenario_4():
     input('Конец')
     exit()
 
-
+advice = 1
 art = Artefact()
 enemy = Enemy('None')
 skill = Skill()
