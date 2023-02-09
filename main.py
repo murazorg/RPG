@@ -30,6 +30,7 @@ class Character:
         self.duration = [False, False, False, False, False, False, False, False, False, False,
                          False, False, False, False, False, False, False,
                          False, False, False, False, False, False, False]
+        self.advice = 1
 
     def menu(self):
         a = False
@@ -47,7 +48,7 @@ class Character:
             case '1':
                 self.all_info()
             case '2':
-                print('Минимальный рекомендуемый уровень: {0}. Желаете отправиться в путь?'.format(advice))
+                print('Минимальный рекомендуемый уровень: {0}. Желаете отправиться в путь?'.format(self.advice))
                 print('Да:                           1')
                 print('Нет:                          0')
                 if input() == '1':
@@ -1665,7 +1666,7 @@ def scenario_1():
     print("Когда вы развешивали на деревьях уши убитых гоблинов, "
           "вам на глаза попался рваный капюшон, что свисал с одной из веток. Вы, недолго думая, прихватили и его")
     art.get_artefact('Капюшон расторопного вора')
-    advice = 3
+    person.advice = 3
     person.menu()
 
 def scenario_2():
@@ -1697,7 +1698,7 @@ def scenario_2():
         i += 1
         sleep(1)
         print('.', end='')
-    advice = 7
+    person.advice = 7
     person.menu()
 
 def scenario_3():
@@ -1729,7 +1730,7 @@ def scenario_3():
         sleep(1)
         print('.', end='')
     print("Засолив голову и подвесив её возле входа, вы сложили второй трофейный меч")
-    advice = 9
+    person.advice = 9
     person.menu()
 
 def scenario_4():
@@ -1765,7 +1766,7 @@ def scenario_4():
     input('Конец')
     exit()
 
-advice = 1
+
 art = Artefact()
 enemy = Enemy('None')
 skill = Skill()
