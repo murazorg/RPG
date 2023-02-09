@@ -10,17 +10,17 @@ def random_enemy(person, difficulty):
             for key, value in enemy_lvl.items():
                 if (person.lvl >= value[0]) and (person.lvl <= value[1]):
                     pull.append(key)
-            print(pull)
+            # print(pull)  # Для откладки пулла
             return random.choice(pull)
         case 'normal':
             for key, value in enemy_lvl.items():
                 if (person.lvl >= (value[0] - 1)) and (person.lvl <= (value[1] - 1)):
                     pull.append(key)
-            print(pull)
+            # print(pull)  # Для откладки пулла
             return random.choice(pull)
         case 'hard':
             for key, value in enemy_lvl.items():
                 if (person.lvl >= (value[0] - 2)) and (person.lvl <= (value[1] - 2)):
                     pull.append(key)
-            print(pull)
+            # print(pull)  # Для откладки пулла
             return random.choice(pull)
