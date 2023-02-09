@@ -126,7 +126,7 @@ class Artefact:
                 person.dmg += 4
                 person.restoration()
             case 'Дубина огра':
-                person.dmg += 14
+                person.dmg += 16
             case 'Папаха победителя':
                 person.change_attribute('strength', 10)
                 person.restoration()
@@ -182,7 +182,7 @@ class Artefact:
                 person.dmg -= 4
                 person.restoration()
             case 'Дубина огра':
-                person.dmg -= 14
+                person.dmg -= 16
             case 'Папаха победителя':
                 person.change_attribute('strength', -10)
                 person.restoration()
