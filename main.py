@@ -23,7 +23,8 @@ class Character:
         self.armor = 0
         self.mag_resist = 0.1
         self.lvl = 1
-        self.points = 10
+        self.points = 0
+        self.exp = 0
         self.name_list = [False, False, False, False, False, False, False, False, False, False,
                           False, False, False, False, False, False, False,
                           False, False, False, False, False, False, False]
@@ -117,8 +118,8 @@ class Character:
         print('Урон:                        ', self.dmg)
         print('Мана:                        ', self.mp)
         print('Колдовство:                  ', self.amp_mag_dmg, '%')
-        print('Броня:                       ', round(self.armor))
-        print('Сопротивление магии:         ', round(self.mag_resist * 100), '%')
+        print('Броня:                       ', round(self.armor, 1))
+        print('Сопротивление магии:         ', round((self.mag_resist * 100), 1), '%')
         print('Умения:                      ', self.print_skills())
         print('Рюкзак:                       [', *art.not_equipment(), ']', sep='')
         print('Экипировано:                  [', *art.equipment(), ']', sep='')
@@ -146,7 +147,7 @@ class Character:
         print('\nИмя:', self.name)
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
-        print('Броня:                       ', round(self.armor), '({0}%)'.format(round(self.armor_impact() * 100)))
+        print('Броня:                       ', round(self.armor, 1), '({0}%)'.format(round(self.armor_impact() * 100)))
         if self.shield > 0:
             print('Щит:                         ', self.shield)
         print('Активные эффекты:            ', self.print_effects(), '\n')
@@ -167,13 +168,13 @@ class Character:
             case 'agility':
                 self.agility += value
                 self.dmg += 1 * value
-                self.armor += 0.25 * value
+                self.armor += 0.2 * value
             case 'intellect':
                 self.intellect += value
                 self.max_mp += 5 * value
                 if self.mp > self.max_mp:
                     self.mp = self.max_mp
-                self.amp_mag_dmg += 0.5 * value
+                self.amp_mag_dmg += 0.25 * value
 
     def restoration(self):
         art.update()
@@ -203,8 +204,17 @@ class Character:
             print('\nВы проснулись и чувствуете что хорошо отдохнули')
             self.menu()
 
+    def give_exp(self, value):
+        self.exp += value
+        exp_for_lvl = round(((self.lvl + 1) * 100) * (0.4 + (0.1 * self.lvl)))
+        if self.exp >= exp_for_lvl:
+            self.points += 1
+            self.exp -= exp_for_lvl
+
+
+
     def lvl_up(self):
-        increase = 10
+        increase = 5
         print('Какой атрибут вы желаете увеличить на {0} единиц?'.format(increase))
         print('                              1    Силу')
         print('                              2    Ловкость')
@@ -241,6 +251,10 @@ class Character:
                 print('Неопознанная команда, возвращение в меню...')
                 sleep(1)
                 self.menu()
+        self.change_attribute('strength', 1)
+        self.change_attribute('agility', 1)
+        self.change_attribute('intellect', 1)
+        self.restoration()
         skill.new()
         self.menu()
 
@@ -345,6 +359,7 @@ class Enemy:
                 self.armor = 2
                 self.mag_resist = 0.1
                 self.effects = {}
+                self.exp = 50
             case 'Орк':
                 self.hp = 150
                 self.dmg = 14
@@ -352,6 +367,7 @@ class Enemy:
                 self.armor = 8
                 self.mag_resist = 0.15
                 self.effects = {'Гнев орка': True}
+                self.exp = 120
             case 'Огр':
                 self.hp = 230
                 self.max_hp = 230
@@ -360,6 +376,7 @@ class Enemy:
                 self.armor = 8
                 self.mag_resist = 0.15
                 self.effects = {'Регенерация': True}
+                self.exp = 350
             case 'Циклоп':
                 self.hp = 460
                 self.dmg = 56
@@ -367,14 +384,16 @@ class Enemy:
                 self.armor = 15
                 self.mag_resist = 0.3
                 self.effects = {'Ярость': False, 'Крепкая кожа': True}
+                self.exp = 720
             case 'Малый энт':
                 self.hp = 90
                 self.max_hp = 90
-                self.dmg = 6
+                self.dmg = 7
                 self.mp = 0
                 self.armor = 4
                 self.mag_resist = 0.1
                 self.effects = {'Малое заживление': True}
+                self.exp = 60
             case 'Гигантский паук':
                 self.hp = 110
                 self.dmg = 8
@@ -382,6 +401,7 @@ class Enemy:
                 self.armor = 4
                 self.mag_resist = 0.1
                 self.effects = {'Ядовитые жвалы': True}
+                self.exp = 100
             case 'Сатир':
                 self.hp = 200
                 self.dmg = 12
@@ -390,6 +410,7 @@ class Enemy:
                 self.mag_resist = 0.25
                 self.effects = {'Порождение магии': True, 'Ослепление': True,
                                 'Восстановление': True, 'Движение маны': True}
+                self.exp = 220
             case 'Беорн':
                 self.hp = 330
                 self.dmg = 20
@@ -397,6 +418,7 @@ class Enemy:
                 self.armor = 12
                 self.mag_resist = 0.1
                 self.effects = {'Глубокие раны': True, 'Обновление': 3}
+                self.exp = 500
             case 'Большой энт':
                 self.hp = 500
                 self.max_hp = 500
@@ -405,6 +427,7 @@ class Enemy:
                 self.armor = 16
                 self.mag_resist = 0.1
                 self.effects = {'Большое заживление': True, 'Шипы': True, 'Цветение': True, 'Развеивание': True}
+                self.exp = 800
 
     def enemy_move(self):
         match self.name:
@@ -492,13 +515,13 @@ class Enemy:
         print('Урон:                        ', self.dmg)
         print('Мана:                        ', self.mp)
         print('Броня:                       ', self.armor)
-        print('Сопротивление магии:         ', round(self.mag_resist * 100), '%')
+        print('Сопротивление магии:         ', round(self.mag_resist * 100, 1), '%')
 
     def battle_info(self):
         print(self.name)
         print('Здоровье:                    ', self.hp)
         print('Мана:                        ', self.mp)
-        print('Броня:                       ', round(self.armor), '({0}%)'.format(round(self.armor_impact() * 100)))
+        print('Броня:                       ', round(self.armor, 1), '({0}%)'.format(round(self.armor_impact() * 100)))
         print('Активные эффекты:            ', self.print_effects())
 
     def armor_impact(self):
@@ -1446,6 +1469,7 @@ def battle(enemy):
         sleep(1)
         debuff(enemy)
         if enemy.hp <= 0:
+            person.give_exp(enemy.exp)
             if 'Каменная кожа. 1ур' in person.effects:
                 del person.effects['Каменная кожа. 1ур']
                 person.armor -= 4
@@ -1524,7 +1548,6 @@ def scenario_1():
         i += 1
         sleep(1)
         print('.', end='')
-    person.points += 2
     print("Недалеко от хижины вы решили развесить на деревьях уши убитых гоблинов")
     # Здесь должна быть функция хаба
     person.menu()
@@ -1553,7 +1576,6 @@ def scenario_2():
         i += 1
         sleep(1)
         print('.', end='')
-    person.points += 2
     # Здесь должна быть функция хаба
     person.menu()
 
@@ -1585,7 +1607,6 @@ def scenario_3():
         sleep(1)
         print('.', end='')
     print("Засолив голову и подвесив её возле входа, вы сложили второй трофейный меч")
-    person.points += 3
     # Здесь должна быть функция хаба
     person.menu()
 
