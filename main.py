@@ -14,7 +14,7 @@ class Character:
         self.hp = 100
         self.max_hp = 100
         self.shield = 0
-        self.dmg = 30
+        self.dmg = 50
         self.mp = 50
         self.max_mp = 50
         self.amp_mag_dmg = 0
@@ -238,7 +238,8 @@ class Character:
                 enemy = Enemy(x)
                 enemy.all_info()
                 battle(enemy)
-                print('Все зрители были в восторге, а вы, окончив грандиозное представление, ушли домой...')
+                print('Все зрители были в восторге, а вы, окончив грандиозное представление и взяв награду, ушли домой...')
+                art.get_artefact('Папаха победителя')
                 self.menu()
             case '2':
                 print('Дождавшись своего часа, вы вышли на арену. На противоположной стороне вас поджидал')
@@ -420,11 +421,11 @@ class Enemy:
                 self.effects = {'Гнев орка': True}
                 self.exp = 120
             case 'Огр':
-                self.hp = 230
-                self.max_hp = 230
-                self.dmg = 33
+                self.hp = 210
+                self.max_hp = 210
+                self.dmg = 28
                 self.mp = 80
-                self.armor = 8
+                self.armor = 7
                 self.mag_resist = 0.15
                 self.effects = {'Регенерация': True}
                 self.exp = 350
@@ -501,14 +502,18 @@ class Enemy:
                     return True
                 if self.mp >= 20:
                     self.mp -= 20
-                    if 'Движение маны' in person.effects:
-                        person.effects['Движение маны'] += 2
+                    if 'Воодушевление' not in person.effects:
+                        if 'Движение маны' in person.effects:
+                            person.effects['Движение маны'] += 2
+                        else:
+                            person.effects['Движение маны'] = 2
+                        self.hp += person.take_mag_attack(person.effects['Движение маны'])
+                        self.mp += person.effects['Движение маны']
+                        print('Сатир расшатал внутренние потоки и выжег', person.effects['Движение маны'], 'здоровья и маны')
+                        return True
                     else:
-                        person.effects['Движение маны'] = 2
-                    person.take_mag_attack(person.effects['Движение маны'])
-                    person.mp -= person.effects['Движение маны']
-                    print('Сатир расшатал внутренние потоки и выжег', person.effects['Движение маны'], 'здоровья и маны')
-                    return True
+                        print('Папаха победителя защитила вас от колдунства')
+                        return True
                 dmg = person.take_attack(self, self.dmg)
                 if dmg: print('Вы получили {0} урона'.format(dmg))
                 return True
@@ -529,13 +534,16 @@ class Enemy:
                 if ('Каменная кожа. 1ур' or 'Каменная кожа. 2ур' or 'Каменная кожа. 3ур' or 'Водный щит. 1ур' or
                         'Водный щит. 2ур' or 'Водный щит. 3ур') in person.effects and self.mp >= 30:
                     self.mp -= 30
-                    print('FOUND!')
                     person.dispelling()
                     return True
                 if self.mp >= 30 and randint(0, 100) <= 33:
                     self.mp -= 30
-                    print(self.name, 'попытался внедрить в вас побег и нанёс {0} урона'.format(person.take_mag_attack(50)))
-                    return True
+                    if 'Воодушевление' not in person.effects:
+                        print(self.name, 'попытался внедрить в вас побег и нанёс {0} урона'.format(person.take_mag_attack(50)))
+                        return True
+                    else:
+                        print('Папаха победителя защитила вас от колдунства')
+                        return True
                 else:
                     dmg = person.take_attack(self, self.dmg)
                     if dmg: print('Вы получили {0} урона'.format(dmg))
@@ -1462,14 +1470,30 @@ def person_effects(enemy):
     skill.condensate()
     skill.sea_snakes(enemy)
 
+def other_buff(already_used):
+    if art.artefacts['Папаха победителя'][2]:
+        if ('Воодушевление' not in person.effects) and (already_used is False):
+            print('\nПапаха победителя воодушевила вас, теперь вы чувствуете себя непобедимым')
+            person.effects['Воодушевление'] = 3
+            return True
+        if 'Воодушевление' in person.effects:
+            if person.effects['Воодушевление'] > 1:
+                person.effects['Воодушевление'] -= 1
+                print('Оставшаяся длительность Воодушевления:', person.effects['Воодушевление'])
+            else:
+                print('\nВоодушевление от Папахи победителя перестало действовать')
+                del person.effects['Воодушевление']
+
 
 
 def battle(enemy):
+    already_used = False
     count = 1
     person.duration = [False, False, False, False, False, False, False, False, False, False,
                        False, False, False, False, False, False, False,
                        False, False, False, False, False, False, False]
     while enemy.hp > 0 and person.hp > 0:
+        already_used = other_buff(already_used)
         skill.time_list = \
             [
                 [4, 6], [5, 6], [6, 6], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
@@ -1549,6 +1573,8 @@ def battle(enemy):
                 del person.effects['Глубокие раны']
             if 'Мираж' in person.effects:
                 del person.effects['Мираж']
+            if 'Воодушевление' in person.effects:
+                del person.effects['Воодушевление']
             print('\nВы победили!\n')
             continue
         sleep(0.5)
@@ -1573,12 +1599,15 @@ def scenario_1():
     input()
     print('Выйдя на охоту за дичью, вы так ничего и не смогли найти, однако вместо дичи...\n')
     input()
-    print('Вам повстречался Гоблин!')
+    print('Вам повстречался гоблин!')
     enemy = Enemy('Гоблин')
     enemy.all_info()
     battle(enemy)
+    print('Пока вы забирали трофейный зуб павшего противника, вам, исподтишка, в спину ударил ещё один гоблин')
+    art.get_artefact('Резец гоблина')
     # Здесь должна быть динамическая функция награды за противника
-    print('Да не один!')
+    print('Вы получили 14 урона!')
+    person.hp -= 14
     enemy = Enemy('Гоблин')
     enemy.all_info()
     battle(enemy)
@@ -1587,14 +1616,20 @@ def scenario_1():
         i += 1
         sleep(1)
         print('.', end='')
-    print("Недалеко от хижины вы решили развесить на деревьях уши убитых гоблинов")
+    print("Когда вы развешивали на деревьях уши убитых гоблинов, "
+          "вам на глаза попался рваный капюшон, что свисал с одной из веток. Вы, недолго думая, прихватили и его")
+    art.get_artefact('Капюшон расторопного вора')
     # Здесь должна быть функция хаба
     person.menu()
 
 def scenario_2():
     print('Узнав что в ваших лесах бродят гоблины, вы решили разведать территорию')
     input()
-    print('Вы зашли уже достаточно далеко, однако не встретили ни одного гоблина, вы насторожились и продолжили путь')
+    print('Зайдя достаточно далеко, вы так и не повстречали ни одного гоблина. \n'
+          'Однако вы встретили иглоспина, что зашиб себя собственным кистнем. Зная, что вы более опытны в обращении'
+          ' с этим оружием, вы незаметно берёте этот прекрасный кистень из рук погибшего.')
+    input()
+    art.get_artefact('Кистень иглоспина')
     input()
     print('После ещё нескольких часов поиска вы наткнулись на Энта!\n')
     input()
@@ -1610,7 +1645,8 @@ def scenario_2():
     enemy = Enemy('Орк')
     enemy.all_info()
     battle(enemy)
-    print('С охапкой хвороста и новым трофейным мечом вы возвращаетесь домой', end='')
+    art.get_artefact('Гномий щит')
+    print('С охапкой хвороста, кистнем и новым трофейным щитом, что носил орк, вы возвратились домой', end='')
     for i in range(3):
         i += 1
         sleep(1)
@@ -1639,8 +1675,9 @@ def scenario_3():
     enemy = Enemy('Огр')
     enemy.all_info()
     battle(enemy)
+    art.get_artefact('Дубина огра')
     print('Из последних сил срубив Огру голову, вы не стали испытывать удачу и продвигаться вглубь пещеры\n'
-          'Выбравшись на поверхность, вы пошли домой', end='')
+          'Забрав его огромную дубину, вы выбрались на поверхность и пошли домой', end='')
     for i in range(3):
         i += 1
         sleep(1)
@@ -1670,14 +1707,16 @@ def scenario_4():
     enemy = Enemy('Циклоп')
     enemy.all_info()
     battle(enemy)
-    print('После серьезной схватки и пронзенного глаза чудища, вы возвращаетесь домой', end='')
+    print('После серьезной схватки и пронзенного глаза чудища, в загоне вы наткнулись на грудную клетку крупного животного. \n'
+          'Рассмотрев в них нечто большее чем останки, вы зацепили их к себе на спину и пошли домой')
+    art.get_artefact('Рёбра кентавра')
     for i in range(3):
         i += 1
         sleep(1)
         print('.', end='')
     print("Окончив все свои опасные путешествия, вы устроили большой ужин из печени Циклопа.\n"
           "Кто же знал, что обычная охота может обернуться в такой подвиг! Это славная история")
-    sleep(7)
+    input('Конец')
     exit()
 
 
@@ -1685,9 +1724,6 @@ art = Artefact()
 enemy = Enemy('None')
 skill = Skill()
 person = Character()
-art.get_artefact('Тиара душ')
-art.get_artefact('Сандали святого')
-art.get_artefact('Зеркальное копьё')
 person.menu()
 scenario_1()
 scenario_2()
