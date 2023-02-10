@@ -11,10 +11,10 @@ class Character:
         self.strength = 0
         self.agility = 0
         self.intellect = 0
-        self.hp = 100
+        self.hp = 1000
         self.max_hp = 100
         self.shield = 0
-        self.dmg = 20
+        self.dmg = 100
         self.mp = 50
         self.max_mp = 50
         self.amp_mag_dmg = 0
@@ -133,7 +133,7 @@ class Character:
         print('Рюкзак:                       [', *art.not_equipment(), ']', sep='')
         print('Экипировано:                  [', *art.equipment(), ']', sep='')
         print('Экипировать/снять:                   1')
-        print('LOGO:                                2')
+        # print('LOGO:                                2')
         print('Назад:                               0')
         choose = input()
         match choose:
@@ -142,9 +142,9 @@ class Character:
                 id = input()
                 art.wear(int(id), person)
                 self.all_info()
-            case '2':
-                print(art.artefacts)
-                self.all_info()
+            # case '2':
+            #     print(art.artefacts)
+            #     self.all_info()
             case '0':
                 self.menu()
             case _:
@@ -346,6 +346,10 @@ class Character:
             attack += person.effects['Глубокие раны']
         attack -= skill.inertial_damping(attack)  # Attack reduced block
         impact = attack - (attack * self.armor_impact())
+        if 'Демоническая кровь' in enemy.effects:
+            if randint(0, 100) <= 20:
+                enemy.hp += round(impact * 0.2)
+                print(enemy.name, 'в ярости наполнил оружие демонической энергией и восстановил {0} здоровья!'.format(round(impact * 0.2)))
         self.hp -= round(impact)
         return round(impact)
 
@@ -446,6 +450,14 @@ class Enemy:
                 self.mag_resist = 0.3
                 self.effects = {'Ярость': False, 'Крепкая кожа': True}
                 self.exp = 720
+            case 'Вожак':
+                self.hp = 500
+                self.dmg = 65
+                self.mp = 0
+                self.armor = 16
+                self.mag_resist = 0.15
+                self.effects = {'Гнев орка': True, 'Демоническая кровь': True, 'Мираж': True}
+                self.exp = 1000
             case 'Малый энт':
                 self.hp = 90
                 self.max_hp = 90
@@ -492,9 +504,12 @@ class Enemy:
 
     def enemy_move(self):
         match self.name:
-            case 'Гоблин' | 'Орк' | 'Огр' | 'Циклоп' | 'Малый энт' | 'Гигантский паук':
+            case 'Гоблин' | 'Орк' | 'Огр' | 'Циклоп' | 'Малый энт' | 'Гигантский паук' | 'Вожак':
                 dmg = person.take_attack(self, self.dmg)
                 if dmg: print('Вы получили {0} урона'.format(dmg))
+                if 'Мираж' in self.effects:
+                    dmg = person.take_attack(self, self.dmg)
+                    if dmg: print('Второй Вожак атаковал и вы получили {0} урона'.format(dmg))
                 return True
             case 'Сатир':
                 if self.effects['Ослепление']:
@@ -517,7 +532,11 @@ class Enemy:
                         else:
                             person.effects['Движение маны'] = 2
                         self.hp += person.take_mag_attack(person.effects['Движение маны'])
-                        self.mp += person.effects['Движение маны']
+                        if person.mp > 0:
+                            self.mp += person.effects['Движение маны']
+                            person.mp -= person.effects['Движение маны']
+                            if person.mp < 0:
+                                person.mp = 0
                         print('Сатир расшатал внутренние потоки и выжег', person.effects['Движение маны'], 'здоровья и маны')
                         return True
                     else:
@@ -601,6 +620,11 @@ class Enemy:
             if randint(0, 100) <= 25:
                 print('Критический промах!')
                 return False
+        if 'Мираж' in self.effects:
+            if randint(0, 100) <= 30:
+                print('Ваша атака попала по иллюзии и развеяла её')
+                del self.effects['Мираж']
+                return False
         if 'Крепкая кожа' in self.effects:
             attack - 10
             print('Крепкая кожа выдержала часть урона')
@@ -626,6 +650,11 @@ class Enemy:
         return round(impact)
 
     def take_mag_attack(self, mag_attack: int):
+        if 'Мираж' in self.effects:
+            if randint(0, 100) <= 30:
+                print('Ваша атака попала по иллюзии и развеяла её')
+                del self.effects['Мираж']
+                return 0
         impact = (mag_attack * (1 + (person.amp_mag_dmg / 100))) * (1 - self.mag_resist)
         self.hp -= round(impact)
         if self.hp > 0:
@@ -1363,10 +1392,12 @@ def skill_number():
         case '0':
             return 'pass'
 
+
 def select_skill(enemy):
     aspect = skill_number()
-    if aspect != 'pass':
-        choose = input()
+    if aspect == 'pass':
+        return False
+    choose = input()
     match aspect:
         case 'earth':
             match choose:
@@ -1422,8 +1453,6 @@ def select_skill(enemy):
                     select_skill(enemy)
                 case _:
                     select_skill(enemy)
-        case 'pass':
-            pass
 
 
 def enemy_effects(enemy):
@@ -1666,8 +1695,9 @@ def scenario_1():
     print("Когда вы развешивали на деревьях уши убитых гоблинов, "
           "вам на глаза попался рваный капюшон, что свисал с одной из веток. Вы, недолго думая, прихватили и его")
     art.get_artefact('Капюшон расторопного вора')
-    person.advice = 3
+    person.advice = 2
     person.menu()
+
 
 def scenario_2():
     print('Узнав что в ваших лесах бродят гоблины, вы решили разведать территорию')
@@ -1698,8 +1728,9 @@ def scenario_2():
         i += 1
         sleep(1)
         print('.', end='')
-    person.advice = 7
+    person.advice = 4
     person.menu()
+
 
 def scenario_3():
     print('Хорошо отдохнув, вы решили завершить дело до конца. На этот раз вы не стали идти в том же направлении')
@@ -1730,11 +1761,11 @@ def scenario_3():
         sleep(1)
         print('.', end='')
     print("Засолив голову и подвесив её возле входа, вы сложили второй трофейный меч")
-    person.advice = 8
+    person.advice = 7
     person.menu()
 
+
 def scenario_4():
-    pass
     print('На другой день, возвращаясь в хижину с новоприобретенным магическим жезлом, что вручил вам ваш давний друг,\n'
           'вы, заприметив неладное, остановились')
     input()
@@ -1761,8 +1792,9 @@ def scenario_4():
           'А все мясо хорошо спрятали')
     art.get_artefact('Шкура зверя')
     art.get_artefact('Магический жезл')
-    person.advice = 9
+    person.advice = 8
     person.menu()
+
 
 def scenario_5():
     print('Собравшись с силами и взяв все необходимое снаряжение, вы отправились исследовать глубины той пещеры')
@@ -1792,10 +1824,17 @@ def scenario_5():
         i += 1
         sleep(1)
         print('.', end='')
-    print("Окончив все свои опасные путешествия, вы устроили большой ужин из печени Циклопа.\n"
-          "Кто же знал, что обычная охота может обернуться в такой подвиг! Это славная история")
-    input('Конец')
-    exit()
+    print("Окончив все свои опасные путешествия, вы устроили большой ужин из печени Циклопа")
+    person.advice = 10
+    person.menu()
+
+
+def scenario_6():
+    enemy = Enemy('Вожак')
+    enemy.all_info()
+    battle(enemy)
+    art.get_artefact('Зеркальное копьё')
+    pass
 
 
 art = Artefact()
@@ -1808,3 +1847,4 @@ scenario_2()
 scenario_3()
 scenario_4()
 scenario_5()
+scenario_6()
