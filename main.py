@@ -2,6 +2,7 @@ from time import sleep
 from random import randint
 from artefacts import Artefact
 from enemy_system import random_enemy
+from tabulate import tabulate
 
 
 class Character:
@@ -117,24 +118,20 @@ class Character:
 
     def all_info(self):
         print('')
-        print('Имя:', self.name)
-        print('Уровень:                     ', self.lvl)
-        print('Очки:                        ', self.points)
-        print('Сила:                        ', self.strength)
-        print('Ловкость:                    ', self.agility)
-        print('Интеллект:                   ', self.intellect)
-        print('Здоровье:                    ', self.hp)
-        print('Урон:                        ', self.dmg)
-        print('Мана:                        ', self.mp)
-        print('Колдовство:                  ', self.amp_mag_dmg, '%')
-        print('Броня:                       ', round(self.armor, 1))
-        print('Сопротивление магии:         ', round((self.mag_resist * 100), 1), '%')
-        print('Умения:                      ', self.print_skills())
-        print('Рюкзак:                       [', *art.not_equipment(), ']', sep='')
-        print('Экипировано:                  [', *art.equipment(), ']', sep='')
-        print('Экипировать/снять:                   1')
-        # print('LOGO:                                2')
-        print('Назад:                               0')
+        print('Имя:                     ', self.name)
+        table_1 = ['Инфо', '', 'Уровень', self.lvl, 'Очки', self.points]
+        table_2 = ['Сила', self.strength, 'Ловкость', self.agility, 'Интеллект', self.intellect]
+        table_3 = ['Объёмы', '', 'Здоровье', self.hp, 'Мана', self.mp]
+        table_4 = ['Нападение', '', 'Урон', self.dmg, 'Колдовство', self.amp_mag_dmg]
+        table_5 = ['Оборона', '', 'Броня', round(self.armor, 1), 'Сопр.магии', '{0}%'.format(round((self.mag_resist * 100), 1))]
+        table_all = [table_1, table_2, table_3, table_4, table_5]
+        print(tabulate(table_all, tablefmt="simple_grid"))
+        print('Умения:           ', self.print_skills())
+        print('Рюкзак:            [', *art.not_equipment(), ']', sep='')
+        print('Экипировано:       [', *art.equipment(), ']', sep='')
+        print('Экипировать/снять: 1')
+        # print('LOGO:              2')
+        print('Назад:             0')
         choose = input()
         match choose:
             case '1':
