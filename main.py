@@ -22,7 +22,7 @@ class Character:
         self.armor = 0
         self.mag_resist = 0.1
         self.lvl = 1
-        self.points = 0
+        self.points = 5
         self.exp = 0
         self.name_list = [False, False, False, False, False, False, False, False, False, False,
                           False, False, False, False, False, False, False,
@@ -336,6 +336,8 @@ class Character:
             attack += person.effects['Глубокие раны']
         attack -= skill.inertial_damping(attack)  # Attack reduced block
         impact = attack - (attack * self.armor_impact())
+        if 'Трансформация' in self.effects:
+            impact *= 0.1
         if 'Демоническая кровь' in enemy.effects:
             if randint(0, 100) <= 20:
                 enemy.hp += round(impact * 0.33)
@@ -360,6 +362,8 @@ class Character:
                 print('Магический щит поглотил {0} магического урона'.format(dmg_on_shield))
                 mag_attack = 0
         impact = mag_attack - (mag_attack * self.mag_resist)
+        if 'Трансформация' in self.effects:
+            impact *= 0.1
         self.hp -= round(impact)
         return round(impact)
 
@@ -393,6 +397,8 @@ class Character:
             del self.effects['Водный щит. 3ур']
             person.shield = 0
             self.duration[12][0] = 0
+        if 'Трансформация' in self.effects:
+            del self.effects['Трансформация']
         print('Вам развеяли положительные эффекты')
 
 
@@ -550,7 +556,7 @@ class Enemy:
                 return True
             case 'Большой энт':
                 if ('Каменная кожа. 1ур' or 'Каменная кожа. 2ур' or 'Каменная кожа. 3ур' or 'Водный щит. 1ур' or
-                        'Водный щит. 2ур' or 'Водный щит. 3ур') in person.effects and self.mp >= 30:
+                        'Водный щит. 2ур' or 'Водный щит. 3ур' or 'Трансформация') in person.effects and self.mp >= 30:
                     self.mp -= 30
                     person.dispelling()
                     return True
@@ -623,6 +629,8 @@ class Enemy:
                 print('Шипы нанесли {0} урона'.format(dmg))
         skill.fusion(self)
         impact = attack - (attack * self.armor_impact())
+        if 'Трансформация' in person.effects:
+            impact *= 0.1
         self.hp -= round(impact)
         if self.hp > 0:
             if 'Ярость' in self.effects:
@@ -641,6 +649,8 @@ class Enemy:
                 del self.effects['Мираж']
                 return 0
         impact = (mag_attack * (1 + (person.amp_mag_dmg / 100))) * (1 - self.mag_resist)
+        if 'Трансформация' in person.effects:
+            impact *= 0.1
         self.hp -= round(impact)
         if self.hp > 0:
             if 'Ярость' in self.effects:
@@ -1189,7 +1199,6 @@ class Skill:
     def sea_snakes(self, enemy):
         if person.name_list[16]:
             dmg = enemy.take_mag_attack(person.intellect * 0.5)
-            enemy.hp -= dmg
             enemy.mag_resist -= 0.01
             print('Морские змеи нанесли {0} урона. {1} стал чувствительнее к мане'.format(dmg, enemy.name))
 
@@ -1468,24 +1477,20 @@ def enemy_effects(enemy):
 def debuff(enemy):
     if 'Огненный Аркан' in enemy.effects:
         dmg = enemy.take_mag_attack(enemy.hp * 0.1)
-        dmg = round(dmg)
         print('Огненный Дух нанес {0} урона'.format(dmg))
     if 'Гипоцентр' in enemy.effects:
         dmg = enemy.take_mag_attack(50)
-        dmg = round(dmg)
         print('Гипоцентр нанёс {0} урона'.format(dmg))
     if 'Поджиг. 1ур' in enemy.effects:
         dmg = enemy.take_mag_attack(person.agility * 0.25)
-        dmg = round(dmg)
         print('Поджиг нанёс {0} урона'.format(dmg))
     if 'Поджиг. 2ур' in enemy.effects:
         dmg = enemy.take_mag_attack(person.agility * 0.5)
-        dmg = round(dmg)
         print('Поджиг нанёс {0} урона'.format(dmg))
     if 'Поджиг. 3ур' in enemy.effects:
         dmg = enemy.take_mag_attack(person.agility * 0.75)
-        dmg = round(dmg)
         print('Поджиг нанёс {0} урона'.format(dmg))
+
 
 def person_effects(enemy):
     if 'Кольцо жизненной силы' in person.effects:
@@ -1493,12 +1498,9 @@ def person_effects(enemy):
     skill.condensate()
     skill.sea_snakes(enemy)
 
+
 def other_buff(already_used):
     if art.artefacts['Папаха победителя'][2]:
-        if ('Воодушевление' not in person.effects) and (already_used is False):
-            print('\nПапаха победителя воодушевила вас, теперь вы чувствуете себя непобедимым')
-            person.effects['Воодушевление'] = 3
-            return True
         if 'Воодушевление' in person.effects:
             if person.effects['Воодушевление'] > 1:
                 person.effects['Воодушевление'] -= 1
@@ -1506,11 +1508,22 @@ def other_buff(already_used):
             else:
                 print('\nВоодушевление от Папахи победителя перестало действовать')
                 del person.effects['Воодушевление']
+        if ('Воодушевление' not in person.effects) and (already_used[1] is False):
+            print('\nПапаха победителя воодушевила вас, теперь вы чувствуете себя непобедимым')
+            person.effects['Воодушевление'] = 3
+            already_used[1] = True
+    if 'Трансформация' in person.effects:
+        if person.effects['Трансформация'] > 1:
+            person.effects['Трансформация'] -= 1
+            print('Оставшаяся длительность Трансформации:', person.effects['Трансформация'])
+        else:
+            print('\nСила трансформации иссякла и вы приземлились на землю')
+            del person.effects['Трансформация']
+    return already_used
 
 
-
-def battle(enemy, arena = False):
-    already_used = False
+def battle(enemy, arena=False):
+    already_used = ['Папаха победителя', False]
     count = 1
     person.duration = [False, False, False, False, False, False, False, False, False, False,
                        False, False, False, False, False, False, False,
@@ -1598,6 +1611,8 @@ def battle(enemy, arena = False):
                 del person.effects['Мираж']
             if 'Воодушевление' in person.effects:
                 del person.effects['Воодушевление']
+            if 'Трансформация' in person.effects:
+                del person.effects['Трансформация']
             print('\nВы победили!\n')
             continue
         sleep(0.5)
@@ -1641,6 +1656,8 @@ def battle(enemy, arena = False):
                 del person.effects['Мираж']
             if 'Воодушевление' in person.effects:
                 del person.effects['Воодушевление']
+            if 'Трансформация' in person.effects:
+                del person.effects['Трансформация']
             person.exp = 0
             person.hp = 10
             return False
@@ -1860,6 +1877,7 @@ art = Artefact()
 enemy = Enemy('None')
 skill = Skill()
 person = Character()
+art.get_artefact('Вороний глиф')
 person.menu()
 scenario_1()
 scenario_2()
