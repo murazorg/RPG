@@ -15,6 +15,7 @@ class Artefact:
                  'Капюшон расторопного вора': ['Голова', False, False, None],
                  'Дубина огра': ['Правая рука', False, False, None],
                  'Папаха победителя': ['Голова', False, False, None],
+                 'Вороний глиф': ['Карман', False, False, None]
                  }  # Слот, Подобран, Одет, ID
     artefact_skill = {}
     count = 0
@@ -66,6 +67,11 @@ class Artefact:
                         print('Камень в центре тиары зловеще загорелся и поглотил ваши жизненные силы')
                         person.mp += 50
                         person.hp -= 100
+                        self.artefact_skill[k][0] = False
+                        return True
+                    case 'Трансформация':
+                        print('Прочитав надпись на глифе, вы превратились в большого ворона и, уклоняясь от атак, взмыли в небо')
+                        person.effects['Трансформация'] = 3
                         self.artefact_skill[k][0] = False
                         return True
         print('Неверный ввод')
@@ -130,6 +136,8 @@ class Artefact:
             case 'Папаха победителя':
                 person.change_attribute('strength', 10)
                 person.restoration()
+            case 'Вороний глиф':
+                self.artefact_skill['Трансформация'] = [True, self.artefacts['Вороний глиф'][3]]
 
     def effect_off(self, name, person):
         match name:
@@ -186,6 +194,8 @@ class Artefact:
             case 'Папаха победителя':
                 person.change_attribute('strength', -10)
                 person.restoration()
+            case 'Вороний глиф':
+                del self.artefact_skill['Трансформация']
 
     def not_equipment(self):
         a = []
