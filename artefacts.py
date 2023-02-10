@@ -1,7 +1,7 @@
 class Artefact:
     artefacts = {'Гномий щит': ['Левая рука', False, False, None],
-                 # 'Кулон смерти': ['Шея', False, False, None],
-                 # 'Кулон жизни': ['Шея', False, False, None],
+                 'Кулон смерти': ['Шея', False, False, None],
+                 'Кулон жизни': ['Шея', False, False, None],
                  'Магический жезл': ['Правая рука', False, False, None],
                  'Кистень иглоспина': ['Правая рука', False, False, None],
                  # 'Шлем Хаоса': ['Голова', False, False, None],
@@ -82,7 +82,7 @@ class Artefact:
             case 'Кулон смерти':
                 person.effects['Кулон смерти'] = True
             case 'Кулон жизни':
-                person.max_hp += 75
+                person.max_hp += 45
                 person.restoration()
             case 'Магический жезл':
                 person.change_attribute('intellect', 3)
@@ -138,7 +138,7 @@ class Artefact:
             case 'Кулон смерти':
                 del person.effects['Кулон смерти']
             case 'Кулон жизни':
-                person.max_hp -= 75
+                person.max_hp -= 45
                 person.restoration()
             case 'Магический жезл':
                 person.change_attribute('intellect', -3)
