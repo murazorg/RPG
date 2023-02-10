@@ -118,13 +118,11 @@ class Character:
 
     def all_info(self):
         print('')
-        print('Имя:                     ', self.name)
-        table_1 = ['Инфо', '', 'Уровень', self.lvl, 'Очки', self.points]
-        table_2 = ['Сила', self.strength, 'Ловкость', self.agility, 'Интеллект', self.intellect]
-        table_3 = ['Объёмы', '', 'Здоровье', self.hp, 'Мана', self.mp]
-        table_4 = ['Нападение', '', 'Урон', self.dmg, 'Колдовство', self.amp_mag_dmg]
-        table_5 = ['Оборона', '', 'Броня', round(self.armor, 1), 'Сопр.магии', '{0}%'.format(round((self.mag_resist * 100), 1))]
-        table_all = [table_1, table_2, table_3, table_4, table_5]
+        table_1 = ['Имя', self.name, 'Уровень', self.lvl, 'Очки', self.points]
+        table_2 = ['Сила', self.strength, 'Здоровье', self.hp, 'Сопр.магии', '{0}%'.format(round((self.mag_resist * 100), 1)) ]
+        table_3 = ['Ловкость', self.agility, 'Урон', self.dmg, 'Броня', round(self.armor, 1)]
+        table_4 = ['Интеллект', self.intellect, 'Мана', self.mp, 'Колдовство', self.amp_mag_dmg]
+        table_all = [table_1, table_2, table_3, table_4]
         print(tabulate(table_all, tablefmt="simple_grid"))
         print('Умения:           ', self.print_skills())
         print('Рюкзак:            [', *art.not_equipment(), ']', sep='')
@@ -150,13 +148,14 @@ class Character:
                 self.menu()
 
     def battle_info(self):
-        print('\nИмя:', self.name)
-        print('Здоровье:                    ', self.hp)
-        print('Мана:                        ', self.mp)
-        print('Броня:                       ', round(self.armor, 1), '({0}%)'.format(round(self.armor_impact() * 100)))
-        if self.shield > 0:
-            print('Щит:                         ', self.shield)
-        print('Активные эффекты:            ', self.print_effects(), '\n')
+        print('')
+        print(self.name)
+        table_1 = ['Здоровье', self.hp, 'Сопр.магии', '{0}%'.format(round((self.mag_resist * 100), 1))]
+        table_2 = ['Урон', self.dmg, 'Броня', '{0}({1}%)'.format(round(self.armor, 1), format(round(self.armor_impact() * 100)))]
+        table_3 = ['Мана', self.mp, 'Щит', self.shield]
+        table_all = [table_1, table_2, table_3]
+        print(tabulate(table_all, tablefmt="simple_grid"))
+        print('Активные эффекты:', self.print_effects(), '\n')
 
     def armor_impact(self):
         damage_reduction = ((0.05 * self.armor) / (1 + 0.05 * self.armor))
@@ -230,18 +229,15 @@ class Character:
                 print('Дождавшись своего часа, вы вышли на арену. На противоположной стороне вас поджидал')
                 x = random_enemy(self, 'normal')
                 enemy = Enemy(x)
-                enemy.all_info()
                 if battle(enemy, True) is False: return False
                 print('Прикончив первого соперника, под возгласы публики, на арену вышел второй')
                 x = random_enemy(self, 'normal')
                 enemy = Enemy(x)
-                enemy.all_info()
                 if battle(enemy, True) is False: return False
                 print('Когда вы расправились со вторым, арена задрожала от множества криков. \n'
                       'Но было рано придаваться славе, перед вами был выпущен последний соперник')
                 x = random_enemy(self, 'hard')
                 enemy = Enemy(x)
-                enemy.all_info()
                 if battle(enemy, True) is False: return False
                 print('Все зрители были в восторге, а вы, окончив грандиозное представление и взяв награду, ушли домой...')
                 if art.artefacts['Папаха победителя'][1] is False:
@@ -251,17 +247,14 @@ class Character:
                 print('Дождавшись своего часа, вы вышли на арену. На противоположной стороне вас поджидал')
                 x = random_enemy(self, 'easy')
                 enemy = Enemy(x)
-                enemy.all_info()
                 if battle(enemy, True) is False: return False
                 print('Прикончив первого соперника, на арену вышел второй')
                 x = random_enemy(self, 'easy')
                 enemy = Enemy(x)
-                enemy.all_info()
                 if battle(enemy, True) is False: return False
                 print('Когда вы расправились со вторым, перед вами был выпущен последний соперник')
                 x = random_enemy(self, 'normal')
                 enemy = Enemy(x)
-                enemy.all_info()
                 if battle(enemy, True) is False: return False
                 print('Под аплодисменты зрителей вы, окончив эту схватку победой, ушли домой...')
                 return True
@@ -593,19 +586,14 @@ class Enemy:
                 a.append(keys)
         return a
 
-    def all_info(self):
-        print(self.name)
-        print('Здоровье:                    ', self.hp)
-        print('Урон:                        ', self.dmg)
-        print('Мана:                        ', self.mp)
-        print('Броня:                       ', self.armor)
-        print('Сопротивление магии:         ', round(self.mag_resist * 100, 1), '%')
-
     def battle_info(self):
         print(self.name)
-        print('Здоровье:                    ', self.hp)
-        print('Мана:                        ', self.mp)
-        print('Броня:                       ', round(self.armor, 1), '({0}%)'.format(round(self.armor_impact() * 100)))
+        table_1 = ['Здоровье', self.hp, 'Сопр.магии', '{0}%'.format(round((self.mag_resist * 100), 1))]
+        table_2 = ['Урон', self.dmg, 'Броня',
+                   '{0}({1}%)'.format(round(self.armor, 1), format(round(self.armor_impact() * 100)))]
+        table_3 = ['Мана', self.mp]
+        table_all = [table_1, table_2, table_3]
+        print(tabulate(table_all, tablefmt="simple_grid"))
         print('Активные эффекты:            ', self.print_effects())
 
     def armor_impact(self):
@@ -1674,7 +1662,6 @@ def scenario_1():
     input()
     print('Вам повстречался гоблин!')
     enemy = Enemy('Гоблин')
-    enemy.all_info()
     battle(enemy)
     print('Пока вы забирали трофейный зуб павшего противника, вам, исподтишка, в спину ударил ещё один гоблин')
     art.get_artefact('Резец гоблина')
@@ -1682,7 +1669,6 @@ def scenario_1():
     print('Вы получили 14 урона!')
     person.hp -= 14
     enemy = Enemy('Гоблин')
-    enemy.all_info()
     battle(enemy)
     print('После небольшой охоты вы возвращаетесь домой', end='')
     for i in range(3):
@@ -1708,16 +1694,13 @@ def scenario_2():
     print('После ещё нескольких часов поиска вы наткнулись на Энта!\n')
     input()
     enemy = Enemy('Малый энт')
-    enemy.all_info()
     battle(enemy)
     print('Совершив решающий удар по, и без того, слабому противнику, из кустов вышел ещё один Энт!')
     sleep(1)
     enemy = Enemy('Малый энт')
-    enemy.all_info()
     battle(enemy)
     print('На шум прибежал Орк. У него был орочий тесак и небольшой круглый щит')
     enemy = Enemy('Орк')
-    enemy.all_info()
     battle(enemy)
     art.get_artefact('Гномий щит')
     print('С охапкой хвороста, кистнем и новым трофейным щитом, что носил орк, вы возвратились домой', end='')
@@ -1744,11 +1727,9 @@ def scenario_3():
           'оставив вас лежать перед Орком и Огром')
     input()
     enemy = Enemy('Орк')
-    enemy.all_info()
     battle(enemy)
     print('После смерти своего собрата, до Огра дошло что никто больше не приготовит ему еду. Он взревел!')
     enemy = Enemy('Огр')
-    enemy.all_info()
     battle(enemy)
     art.get_artefact('Дубина огра')
     print('Из последних сил срубив Огру голову, вы не стали испытывать удачу и продвигаться вглубь пещеры\n'
@@ -1776,7 +1757,6 @@ def scenario_4():
     input()
     print('Поспешно встав, вы увидели что это был не обычный медведь, это был могучий беорн!')
     enemy = Enemy('Беорн')
-    enemy.all_info()
     battle(enemy)
     print('Одержав победу над лесным зверем, вы решили в будущем перестать вывешивать еду на веранду')
     input()
@@ -1802,17 +1782,14 @@ def scenario_5():
     input()
     print("Возле ворот стояло два Орка. Заприметив вас, они вступили в бой")
     enemy = Enemy('Орк')
-    enemy.all_info()
     battle(enemy)
     enemy = Enemy('Орк')
-    enemy.all_info()
     battle(enemy)
     print("Расправившись с Орками, вы исследовали домик на берегу озера. В нем вы нашли большой черный ключ\n"
           "Решив, что он от тех ворот, вы поспешили им воспользоваться")
     input()
     print("Отворив врата, внутри вас ждал дикий Циклоп!")
     enemy = Enemy('Циклоп')
-    enemy.all_info()
     battle(enemy)
     print('После серьезной схватки и пронзенного глаза чудища, в загоне вы наткнулись на грудную клетку крупного животного. \n'
           'Рассмотрев в ней нечто большее чем останки, вы зацепили её к себе на спину и пошли домой')
@@ -1866,7 +1843,6 @@ def scenario_6():
     input()
     print('В таком невыгодном положении вам ничего не оставалось кроме как принять его вызов...')
     enemy = Enemy('Урук-хай')
-    enemy.all_info()
     battle(enemy)
     print('Выйдя победителем из этой кровожадной битвы, все наблюдавшие орки закричали:\n'
           'Урук-хай честь, Урук-хай держит слово!')
