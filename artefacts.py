@@ -1,3 +1,6 @@
+from tabulate import tabulate
+
+
 class Artefact:
     artefacts = {'Гномий щит': ['Левая рука', False, False, None],
                  'Кулон смерти': ['Шея', False, False, None],
@@ -91,7 +94,7 @@ class Artefact:
                 person.max_hp += 45
                 person.restoration()
             case 'Магический жезл':
-                person.change_attribute('intellect', 3)
+                person.change_attribute('intellect', 5)
                 person.amp_mag_dmg += 5
                 person.restoration()
             case 'Кистень иглоспина':
@@ -149,7 +152,7 @@ class Artefact:
                 person.max_hp -= 45
                 person.restoration()
             case 'Магический жезл':
-                person.change_attribute('intellect', -3)
+                person.change_attribute('intellect', -5)
                 person.amp_mag_dmg -= 5
                 person.restoration()
             case 'Кистень иглоспина':
@@ -198,31 +201,50 @@ class Artefact:
                 del self.artefact_skill['Трансформация']
 
     def not_equipment(self):
-        a = []
+        table = []
         for key, value in self.artefacts.items():
             if value[1] and (value[2] is False):
-                a.append(value[3])
-                a.append(':')
-                a.append(key)
-                a.append(':')
-                a.append(value[0])
-                a.append('    ')
-        if a:
-            return a
+                table.append(value[3])
+                table.append(':')
+                table.append(key)
+                table.append(':')
+                table.append(value[0])
+                table.append('    ')
+        if table:
+            return table
         else:
             return "Рюкзак пуст"
 
     def equipment(self):
-        a = []
+        table_A = [None, None, None]
+        table_B = [None, None, None]
+        table_C = [None, None, None]
+        table_D = [None, None, None]
+        table = [table_A, table_B, table_C, table_D]
         for key, value in self.artefacts.items():
             if value[1] and value[2]:
-                a.append(value[3])
-                a.append(':')
-                a.append(key)
-                a.append(':')
-                a.append(value[0])
-                a.append('    ')
-        if a:
-            return a
+                match value[0]:
+                    case 'Голова':
+                        table_A[1] = '{0}.{1}'.format(value[3], key)
+                    case 'Кольцо':
+                        table_B[0] = '{0}.{1}'.format(value[3], key)
+                    case 'Шея':
+                        table_B[1] = '{0}.{1}'.format(value[3], key)
+                    case 'Перчатка':
+                        table_B[2] = '{0}.{1}'.format(value[3], key)
+                    case 'Правая рука':
+                        table_C[0] = '{0}.{1}'.format(value[3], key)
+                    case 'Торс':
+                        table_C[1] = '{0}.{1}'.format(value[3], key)
+                    case 'Левая рука':
+                        table_C[2] = '{0}.{1}'.format(value[3], key)
+                    case 'Карман':
+                        table_D[0] = '{0}.{1}'.format(value[3], key)
+                    case 'Ноги':
+                        table_D[1] = '{0}.{1}'.format(value[3], key)
+                    case 'Накидка':
+                        table_D[2] = '{0}.{1}'.format(value[3], key)
+        if table:
+            return print(tabulate(table, tablefmt="simple_grid", missingval=''))
         else:
             return "Ничего не экипировано"
