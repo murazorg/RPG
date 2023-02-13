@@ -12,17 +12,17 @@ class Character:
         self.strength = 0
         self.agility = 0
         self.intellect = 0
-        self.hp = 100
-        self.max_hp = 100
+        self.hp = 120
+        self.max_hp = 120
         self.shield = 0
         self.dmg = 20
         self.mp = 50
         self.max_mp = 50
         self.amp_mag_dmg = 0
-        self.armor = 0
+        self.armor = 2
         self.mag_resist = 0.1
         self.lvl = 1
-        self.points = 5
+        self.points = 0
         self.exp = 0
         self.name_list = [False, False, False, False, False, False, False, False, False, False,
                           False, False, False, False, False, False, False,
@@ -47,7 +47,7 @@ class Character:
         choose = input()
         match choose:
             case '1':
-                self.all_info()
+                self.info()
             case '2':
                 print('Минимальный рекомендуемый уровень: {0}. Желаете отправиться в путь?'.format(self.advice))
                 print('Да:                           1')
@@ -116,17 +116,18 @@ class Character:
                 a.append(keys)
         return a
 
-    def all_info(self):
+    def info(self):
         print('')
         table_1 = ['Имя', self.name, 'Уровень', self.lvl, 'Очки', self.points]
         table_2 = ['Сила', self.strength, 'Здоровье', self.hp, 'Сопр.магии', '{0}%'.format(round((self.mag_resist * 100), 1)) ]
         table_3 = ['Ловкость', self.agility, 'Урон', self.dmg, 'Броня', round(self.armor, 1)]
-        table_4 = ['Интеллект', self.intellect, 'Мана', self.mp, 'Колдовство', self.amp_mag_dmg]
+        table_4 = ['Интеллект', self.intellect, 'Мана', self.mp, 'Колдовство', '{0}%'.format(self.amp_mag_dmg)]
         table_all = [table_1, table_2, table_3, table_4]
         print(tabulate(table_all, tablefmt="simple_grid"))
         print('Умения:           ', self.print_skills())
         print('Рюкзак:            [', *art.not_equipment(), ']', sep='')
-        print('Экипировано:       [', *art.equipment(), ']', sep='')
+        print('Экипировано:')
+        art.equipment()
         print('Экипировать/снять: 1')
         # print('LOGO:              2')
         print('Назад:             0')
@@ -136,10 +137,10 @@ class Character:
                 print('\nВведите номер предмета, который хотите экипировать...')
                 id = input()
                 art.wear(int(id), person)
-                self.all_info()
+                self.info()
             # case '2':
             #     print(art.artefacts)
-            #     self.all_info()
+            #     self.info()
             case '0':
                 self.menu()
             case _:
@@ -430,20 +431,20 @@ class Enemy:
                 self.effects = {'Гнев орка': True}
                 self.exp = 120
             case 'Огр':
-                self.hp = 210
-                self.max_hp = 210
-                self.dmg = 28
+                self.hp = 200
+                self.max_hp = 200
+                self.dmg = 24
                 self.mp = 80
                 self.armor = 7
-                self.mag_resist = 0.15
+                self.mag_resist = 0.05
                 self.effects = {'Регенерация': True}
                 self.exp = 350
             case 'Циклоп':
-                self.hp = 460
+                self.hp = 400
                 self.dmg = 56
                 self.mp = 0
                 self.armor = 15
-                self.mag_resist = 0.3
+                self.mag_resist = 0.15
                 self.effects = {'Ярость': False, 'Крепкая кожа': True}
                 self.exp = 720
             case 'Урук-хай':
@@ -472,7 +473,7 @@ class Enemy:
                 self.effects = {'Ядовитые жвалы': True}
                 self.exp = 100
             case 'Сатир':
-                self.hp = 200
+                self.hp = 190
                 self.dmg = 12
                 self.mp = 200
                 self.armor = 6
@@ -638,8 +639,8 @@ class Enemy:
                     if self.hp <= 160:
                         self.effects['Ярость'] = True
                         print(self.name, 'вошёл в состояние ярости')
-                        self.mag_resist += 0.2
-                        self.dmg += 14
+                        self.mag_resist += 0.15
+                        self.dmg += 10
         return round(impact)
 
     def take_mag_attack(self, mag_attack: int):
@@ -658,8 +659,8 @@ class Enemy:
                     if self.hp <= 160:
                         self.effects['Ярость'] = True
                         print(self.name, 'вошёл в состояние ярости')
-                        self.mag_resist += 0.2
-                        self.dmg += 14
+                        self.mag_resist += 0.15
+                        self.dmg += 10
         return round(impact)
 
 
@@ -667,7 +668,7 @@ class Skill:
     def __init__(self):
         self.time_list = \
             [
-                [3, 6], [4, 6], [5, 6], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
+                [3, 6], [4, 6], [5, 6], [0, 1], [0, 1], [0, 1], [None], [None], [None], [3, 6],
                 [7, 3], [7, 3], [7, 3], [None], [None], [None], [None],
                 [None], [None], [None], [2, 5], [3, 5], [4, 5], [5, 5]
             ]
@@ -1107,11 +1108,11 @@ class Skill:
         false_count = person.name_list[6:9].count(False)
         match false_count:
             case 2:
-                if randint(0, 100) <= 50:
+                if randint(0, 100) <= 30:
                     block = 8
                     print('Слои песка заблокировали {0} урона'.format(block))
             case 1:
-                if randint(0, 100) <= 50:
+                if randint(0, 100) <= 40:
                     block = 16
                     if attack > block:
                         print('Слои песка заблокировали {0} урона'.format(block))
@@ -1173,28 +1174,28 @@ class Skill:
                     condensate = person.max_mp * 0.05
                     if condensate > 100:
                         condensate = 100
-                    person.mp += condensate
+                    person.mp += round(condensate)
                     if person.mp > person.max_mp:
                         person.mp = person.max_mp
-                    print('Вы сконденсировали {0} маны'.format(condensate))
+                    print('Вы сконденсировали {0} маны'.format(round(condensate)))
             case 1:
                 if person.mp < person.max_mp:
                     condensate = person.max_mp * 0.075
                     if condensate > 100:
                         condensate = 100
-                    person.mp += condensate
+                    person.mp += round(condensate)
                     if person.mp > person.max_mp:
                         person.mp = person.max_mp
-                    print('Вы сконденсировали {0} маны'.format(condensate))
+                    print('Вы сконденсировали {0} маны'.format(round(condensate)))
             case 0:
                 if person.mp < person.max_mp:
                     condensate = person.max_mp * 0.1
                     if condensate > 100:
                         condensate = 100
-                    person.mp += condensate
+                    person.mp += round(condensate)
                     if person.mp > person.max_mp:
                         person.mp = person.max_mp
-                    print('Вы сконденсировали {0} маны'.format(condensate))
+                    print('Вы сконденсировали {0} маны'.format(round(condensate)))
 
     def sea_snakes(self, enemy):
         if person.name_list[16]:
@@ -1532,14 +1533,14 @@ def battle(enemy, arena=False):
         already_used = other_buff(already_used)
         skill.time_list = \
             [
-                [4, 6], [5, 6], [6, 6], [0, 2], [0, 2], [0, 2], [None], [None], [None], [3, 6],
+                [4, 6], [5, 6], [6, 6], [0, 1], [0, 1], [0, 1], [None], [None], [None], [3, 6],
                 [7, 3], [7, 3], [7, 3], [None], [None], [None], [None],
                 [None], [None], [None], [2, 5], [3, 5], [4, 5], [5, 5]
             ]
         check(person.duration, enemy)
         sleep(1)
-        person.battle_info()
         enemy.battle_info()
+        person.battle_info()
         while True:
             print('\nХод {0} как вы поступите?'.format(count))
             print('                              1    Атаковать')
@@ -1675,7 +1676,7 @@ def scenario_1():
     input()
     print('Однако, когда пришло время закидывать мясо, вы заметили что его нет! Вы решили исправить эту проблему')
     input()
-    print('Выйдя на охоту за дичью, вы так ничего и не смогли найти, однако вместо дичи...\n')
+    print('Выйдя на охоту за дичью, вы так ничего и не смогли найти, однако вместо дичи...')
     input()
     print('Вам повстречался гоблин!')
     enemy = Enemy('Гоблин')
@@ -1692,7 +1693,7 @@ def scenario_1():
         i += 1
         sleep(1)
         print('.', end='')
-    print("Когда вы развешивали на деревьях уши убитых гоблинов, "
+    print("\nКогда вы развешивали на деревьях уши убитых гоблинов, "
           "вам на глаза попался рваный капюшон, что свисал с одной из веток. Вы, недолго думая, прихватили и его")
     art.get_artefact('Капюшон расторопного вора')
     person.advice = 2
@@ -1708,7 +1709,7 @@ def scenario_2():
     input()
     art.get_artefact('Кистень иглоспина')
     input()
-    print('После ещё нескольких часов поиска вы наткнулись на Энта!\n')
+    print('После ещё нескольких часов поиска вы наткнулись на Энта!')
     input()
     enemy = Enemy('Малый энт')
     battle(enemy)
@@ -1858,7 +1859,7 @@ def scenario_6():
     input()
     print('Даю слово чести, если победишь, они тебя не тронут и мы уйдём из этих земель')
     input()
-    print('В таком невыгодном положении вам ничего не оставалось кроме как принять его вызов...')
+    print('Он мерцнул копьём и в отражении вы увидели бугая, мчащегося на вас...')
     enemy = Enemy('Урук-хай')
     battle(enemy)
     print('Выйдя победителем из этой кровожадной битвы, все наблюдавшие орки закричали:\n'
@@ -1877,7 +1878,6 @@ art = Artefact()
 enemy = Enemy('None')
 skill = Skill()
 person = Character()
-art.get_artefact('Вороний глиф')
 person.menu()
 scenario_1()
 scenario_2()
